@@ -1,4 +1,4 @@
-package com.dalhousie.fundfusion.user.controller;
+package com.dalhousie.FundFusion.user.controller;
 
 import com.dalhousie.fundfusion.exaption.UserNotFoundException;
 import com.dalhousie.fundfusion.user.repository.UserRepository;
