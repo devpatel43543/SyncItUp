@@ -1,21 +1,21 @@
 package com.dalhousie.FundFusion.user.service;
 
+import com.dalhousie.FundFusion.category.entity.Category;
 import com.dalhousie.FundFusion.user.entity.UserTransaction;
-import com.dalhousie.FundFusion.user.repository.UserTransactionRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 
-@Service
-@RequiredArgsConstructor
-public class UserTransactionService {
+public interface UserTransactionService {
 
-    private final UserTransactionRepository userTransactionRepository;
+    UserTransaction logTransaction(UserTransaction userTransaction);
 
-    public void logTransaction(UserTransaction transaction){
-        transaction.setTxnDate(LocalDate.now());
-        userTransactionRepository.save(transaction);
-    }
+    UserTransaction updateTransaction(UserTransaction userTransaction);
+
+    UserTransaction getTransactionWithTxnId(Integer txnId);
+
+    List<UserTransaction> getTransactionsWithinDateRange(LocalDate fromDate, LocalDate toDate);
+
+    List<UserTransaction> getTransactionsWithCategory(Category category);
 
 }

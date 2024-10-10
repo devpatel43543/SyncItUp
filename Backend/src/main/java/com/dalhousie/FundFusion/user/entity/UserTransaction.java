@@ -2,9 +2,11 @@ package com.dalhousie.FundFusion.user.entity;
 
 import com.dalhousie.FundFusion.category.entity.Category;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.lang.NonNull;
 
 import java.time.LocalDate;
 
@@ -16,12 +18,13 @@ public class UserTransaction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int txnId;
+    private Integer txnId;
     private String txnDesc;
-    private long expense;
+    private Float expense;
     private LocalDate txnDate;
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "categoryId")
+    @NotNull(message = "Transaction category is mandatory")
     private Category category;
 
 }
