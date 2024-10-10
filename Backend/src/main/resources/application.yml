@@ -1,6 +1,6 @@
 spring:
+  profiles:
+    active: local
   application:
       name: FundFusion
-  profile:
-    active: local
 
