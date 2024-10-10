@@ -27,8 +27,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public AuthenticationResponse registerUser(RegisterRequest registerRequest) {
         if(userRepository.findByEmail(registerRequest.getEmail()).isPresent()){
-        new UserAlreadyExistException("provided user is already exists");
-    }
+            new UserAlreadyExistException("provided user is already exists");
+        }
         var userModel = User.builder()
                 .name(registerRequest.getName())
                 .email(registerRequest.getEmail())
@@ -52,9 +52,9 @@ public class UserServiceImpl implements UserService {
         log.info("line 52: Authenticating user: {}",authenticateRequest.getEmail());
 
         authenticationManager.authenticate(
-        new UsernamePasswordAuthenticationToken
-                (authenticateRequest.getEmail(),
-                authenticateRequest.getPassword()));
+                new UsernamePasswordAuthenticationToken
+                        (authenticateRequest.getEmail(),
+                                authenticateRequest.getPassword()));
         log.info("line 56");
         var user = userRepository.findByEmail(authenticateRequest.getEmail()).get();
         log.info("line 58:{}",user);

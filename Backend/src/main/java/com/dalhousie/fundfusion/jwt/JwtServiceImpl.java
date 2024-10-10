@@ -92,5 +92,5 @@ public class JwtServiceImpl implements JwtService{
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
-    
+
 }

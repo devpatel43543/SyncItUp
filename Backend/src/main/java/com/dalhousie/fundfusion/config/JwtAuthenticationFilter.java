@@ -28,7 +28,7 @@ import java.util.List;
 @Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-private final JwtService jwtService;
+    private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
 
     private static final List<String> EXCLUDED_URLS = Arrays.asList("/api/check/**");
