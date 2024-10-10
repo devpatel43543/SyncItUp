@@ -1,4 +1,4 @@
-package com.dalhousie.fundfusion;
+package com.dalhousie.FundFusion;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
