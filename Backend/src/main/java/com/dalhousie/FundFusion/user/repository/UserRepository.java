@@ -1,7 +1,7 @@
 package com.dalhousie.FundFusion.user.repository;
 
 
-import com.dalhousie.FundFusion.user.Entity.User;
+import com.dalhousie.FundFusion.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

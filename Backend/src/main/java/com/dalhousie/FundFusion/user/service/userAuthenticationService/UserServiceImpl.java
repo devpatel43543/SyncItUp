@@ -3,7 +3,7 @@ package com.dalhousie.FundFusion.user.service.userAuthenticationService;
 
 import com.dalhousie.FundFusion.exaption.UserAlreadyExistException;
 import com.dalhousie.FundFusion.jwt.JwtService;
-import com.dalhousie.FundFusion.user.Entity.User;
+import com.dalhousie.FundFusion.user.entity.User;
 import com.dalhousie.FundFusion.user.repository.UserRepository;
 import com.dalhousie.FundFusion.user.requestEntity.AuthenticateRequest;
 import com.dalhousie.FundFusion.user.requestEntity.RegisterRequest;

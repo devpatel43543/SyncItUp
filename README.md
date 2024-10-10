@@ -18,3 +18,14 @@ The project includes automated expense tracking, where group expenses are seamle
 - Anupam chopra: an477120@dal.ca
 - Sivarajesh Balamurali: sv997262@dal.ca
 
+## Entity Relationship Diagram
+
+### Initial ERD
+
+<img width="876" alt="Screenshot 2024-10-06 at 11 49 55 AM" src="https://github.com/user-attachments/assets/2dd3a4f9-064a-4630-88af-95b9dde5b20f">
+
+
+Moving forward with the project, there might be changes in it. So, please refer [Latest ERD](https://drive.google.com/file/d/12PAU1F2a7jw8m-XlgI1yU1Ihx-8yUhHW/view?usp=sharing). 
+
+
+
