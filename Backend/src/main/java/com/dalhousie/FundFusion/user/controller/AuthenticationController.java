@@ -1,12 +1,12 @@
 package com.dalhousie.FundFusion.user.controller;
 
-import com.dalhousie.fundfusion.exaption.UserNotFoundException;
-import com.dalhousie.fundfusion.user.repository.UserRepository;
-import com.dalhousie.fundfusion.user.requestEntity.AuthenticateRequest;
-import com.dalhousie.fundfusion.user.requestEntity.RegisterRequest;
-import com.dalhousie.fundfusion.user.responseEntity.AuthenticationResponse;
-import com.dalhousie.fundfusion.user.service.userAuthenticationService.UserService;
-import com.dalhousie.fundfusion.util.CustomResponseBody;
+import com.dalhousie.FundFusion.exaption.UserNotFoundException;
+import com.dalhousie.FundFusion.user.repository.UserRepository;
+import com.dalhousie.FundFusion.user.requestEntity.AuthenticateRequest;
+import com.dalhousie.FundFusion.user.requestEntity.RegisterRequest;
+import com.dalhousie.FundFusion.user.responseEntity.AuthenticationResponse;
+import com.dalhousie.FundFusion.user.service.userAuthenticationService.UserService;
+import com.dalhousie.FundFusion.util.CustomResponseBody;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

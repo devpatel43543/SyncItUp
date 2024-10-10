@@ -1,4 +1,4 @@
-package com.dalhousie.fundfusion.user.requestEntity;
+package com.dalhousie.FundFusion.user.requestEntity;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

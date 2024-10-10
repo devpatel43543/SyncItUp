@@ -1,4 +1,4 @@
-package com.dalhousie.fundfusion.jwt;
+package com.dalhousie.FundFusion.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

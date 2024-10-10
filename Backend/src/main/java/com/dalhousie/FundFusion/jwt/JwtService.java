@@ -1,4 +1,4 @@
-package com.dalhousie.fundfusion.jwt;
+package com.dalhousie.FundFusion.jwt;
 
 import org.springframework.security.core.userdetails.UserDetails;
 

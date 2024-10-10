@@ -1,4 +1,4 @@
-package com.dalhousie.fundfusion.user.Entity;
+package com.dalhousie.FundFusion.user.Entity;
 
 import java.util.Collection;
 import java.util.List;

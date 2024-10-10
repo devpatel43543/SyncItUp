@@ -1,4 +1,4 @@
-package com.dalhousie.fundfusion.exaption;
+package com.dalhousie.FundFusion.exaption;
 
 
 import org.springframework.http.HttpStatus;

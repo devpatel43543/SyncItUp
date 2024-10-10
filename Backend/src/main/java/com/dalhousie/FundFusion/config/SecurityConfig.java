@@ -1,4 +1,4 @@
-package com.dalhousie.fundfusion.config;
+package com.dalhousie.FundFusion.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -1,13 +1,13 @@
-package com.dalhousie.fundfusion.user.service.userAuthenticationService;
+package com.dalhousie.FundFusion.user.service.userAuthenticationService;
 
 
-import com.dalhousie.fundfusion.exaption.UserAlreadyExistException;
-import com.dalhousie.fundfusion.jwt.JwtService;
-import com.dalhousie.fundfusion.user.Entity.User;
-import com.dalhousie.fundfusion.user.repository.UserRepository;
-import com.dalhousie.fundfusion.user.requestEntity.AuthenticateRequest;
-import com.dalhousie.fundfusion.user.requestEntity.RegisterRequest;
-import com.dalhousie.fundfusion.user.responseEntity.AuthenticationResponse;
+import com.dalhousie.FundFusion.exaption.UserAlreadyExistException;
+import com.dalhousie.FundFusion.jwt.JwtService;
+import com.dalhousie.FundFusion.user.Entity.User;
+import com.dalhousie.FundFusion.user.repository.UserRepository;
+import com.dalhousie.FundFusion.user.requestEntity.AuthenticateRequest;
+import com.dalhousie.FundFusion.user.requestEntity.RegisterRequest;
+import com.dalhousie.FundFusion.user.responseEntity.AuthenticationResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
