@@ -22,7 +22,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 @Builder
-@Table(name = "user")
+@Table(name = "USER_ACCOUNT")
 public class User implements UserDetails{
 
     @Id
