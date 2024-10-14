@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import {BASE_URL, ENDPOINTS} from "./Constants.js";
 
 const SignUp = () => {
   const [action, setAction] = useState("Login"); // Toggles between Login and Sign Up
@@ -23,15 +24,28 @@ const SignUp = () => {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (action === "Sign Up") {
-      console.log("Signing Up:", formData);
+    const url = BASE_URL + (action === "Sign Up" ? ENDPOINTS.REGISTER : ENDPOINTS.LOGIN);
 
-    } else {
-      console.log("Logging In:", formData);
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
 
+      const result = await response.json();
+      if (response.ok) {
+        alert('Success: ' + result);
+      } else {
+        alert('Error: ' + result);
+      }
+    } catch (error) {
+      console.error('Error:', error);
     }
   };
 
@@ -132,7 +146,7 @@ const SignUp = () => {
           <div className="text-center mt-4">
             {action === "Login" ? (
                 <p>
-                   Don't have an account?{' '}
+                   Don&#39;t have an account?{' '}
                   <button
                       className="text-indigo-600 hover:text-indigo-800"
                       onClick={() => setAction("Sign Up")}
