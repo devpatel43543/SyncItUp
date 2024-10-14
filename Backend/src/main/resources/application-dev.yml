@@ -1,0 +1,31 @@
+spring:
+  application:
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+    platform: h2
+    initialization-mode: always
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  jpa:
+    #defer-datasource-initialization: true
+    hibernate:
+      ddl-auto: create-drop
+    #show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+logging:
+  level:
+    org:
+      springframework:
+        jdbd: DEBUG
+      hibernate:
+        SQL: DEBUG
+
+
+#If you want to use some other database other than H2, just change the config accordingly. ## DO NOT COMMIT YOUR CHANGED FILE
