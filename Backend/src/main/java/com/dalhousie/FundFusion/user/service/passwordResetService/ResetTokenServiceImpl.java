@@ -1,6 +1,6 @@
 package com.dalhousie.FundFusion.user.service.passwordResetService;
 
-import com.dalhousie.FundFusion.exaption.TokenExpiredException;
+import com.dalhousie.FundFusion.exception.TokenExpiredException;
 import com.dalhousie.FundFusion.user.entity.PasswordReset;
 import com.dalhousie.FundFusion.user.repository.PasswordResetTokenRepository;
 import lombok.RequiredArgsConstructor;

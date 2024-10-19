@@ -1,6 +1,6 @@
 package com.dalhousie.FundFusion.group.service;
 
-import com.dalhousie.FundFusion.exaption.UserNotFoundException;
+import com.dalhousie.FundFusion.exception.UserNotFoundException;
 import com.dalhousie.FundFusion.group.entity.Group;
 import com.dalhousie.FundFusion.group.entity.PendingGroupMembers;
 import com.dalhousie.FundFusion.group.entity.UserGroup;

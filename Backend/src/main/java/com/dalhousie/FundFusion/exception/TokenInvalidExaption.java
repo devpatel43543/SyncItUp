@@ -1,4 +1,4 @@
-package com.dalhousie.FundFusion.exaption;
+package com.dalhousie.FundFusion.exception;
 
 public class TokenInvalidExaption extends RuntimeException {
     public TokenInvalidExaption(String message) {

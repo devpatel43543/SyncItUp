@@ -1,7 +1,7 @@
 package com.dalhousie.FundFusion.user.controller;
 
-import com.dalhousie.FundFusion.exaption.TokenExpiredException;
-import com.dalhousie.FundFusion.exaption.UserNotFoundException;
+import com.dalhousie.FundFusion.exception.TokenExpiredException;
+import com.dalhousie.FundFusion.exception.UserNotFoundException;
 import com.dalhousie.FundFusion.user.repository.PasswordResetTokenRepository;
 import com.dalhousie.FundFusion.user.repository.UserRepository;
 import com.dalhousie.FundFusion.user.requestEntity.AuthenticateRequest;
@@ -13,7 +13,6 @@ import com.dalhousie.FundFusion.user.service.userAuthenticationService.UserServi
 import com.dalhousie.FundFusion.util.CustomResponseBody;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -66,7 +65,7 @@ public class AuthenticationController {
     }
 
 
-    @PostMapping("/forgot_password")
+    @PostMapping("/forgotPassword")
     public ResponseEntity<CustomResponseBody<String>> forgotPassword(HttpServletRequest servletRequest, @Valid @RequestBody ForgotPasswordRequest forgotPasswordRequest) {
         try {
             String resetUrl = userService.getURL(servletRequest) + "/password_reset";
@@ -86,7 +85,7 @@ public class AuthenticationController {
     }
 
 
-    @PostMapping("/password_reset")
+    @PostMapping("/passwordReset")
     public ResponseEntity<CustomResponseBody<String>>resetPassword(@Valid @RequestBody ResetPasswordRequest resetPasswordRequest) {
         try{
             userService.resetPassword(resetPasswordRequest.getEmail(),resetPasswordRequest.getPassword(),resetPasswordRequest.getToken());

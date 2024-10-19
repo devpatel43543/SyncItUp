@@ -36,7 +36,7 @@ public class GroupController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseBody);
         }
     }
-    @GetMapping("/all_group")
+    @GetMapping("/allGroup")
     public ResponseEntity<CustomResponseBody<List<GroupSummaryResponse>>> getAllGroups() {
         try {
             List<GroupSummaryResponse> groupResponses = groupService.getAllGroups();
@@ -78,7 +78,7 @@ public class GroupController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseBody);
         }
     }
-    @DeleteMapping("/delete")
+    @DeleteMapping("/deleteMember")
     public ResponseEntity<CustomResponseBody<GroupResponse>> deleteMember(
             @RequestParam Integer groupId,
             @RequestParam Integer memberId) {

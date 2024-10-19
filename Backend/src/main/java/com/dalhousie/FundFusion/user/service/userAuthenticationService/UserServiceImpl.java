@@ -1,9 +1,9 @@
     package com.dalhousie.FundFusion.user.service.userAuthenticationService;
 
 
-    import com.dalhousie.FundFusion.exaption.TokenInvalidExaption;
-    import com.dalhousie.FundFusion.exaption.UserAlreadyExistException;
-    import com.dalhousie.FundFusion.exaption.UserNotFoundException;
+    import com.dalhousie.FundFusion.exception.TokenInvalidExaption;
+    import com.dalhousie.FundFusion.exception.UserAlreadyExistException;
+    import com.dalhousie.FundFusion.exception.UserNotFoundException;
     import com.dalhousie.FundFusion.group.entity.Group;
     import com.dalhousie.FundFusion.group.entity.PendingGroupMembers;
     import com.dalhousie.FundFusion.group.entity.UserGroup;
