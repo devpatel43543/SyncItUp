@@ -1,8 +1,8 @@
 // Component.js
 import React, { useState } from 'react';
-import { BASE_URL, ENDPOINTS } from './Constants.js';
+import { AUTH_TOKEN, BASE_URL, ENDPOINTS } from '../utils/Constants.js';
 import { useNavigate } from 'react-router-dom';
-import './App.css';
+import '../App.css';
 
 export default function Component({ onLoginSuccess }) {
   const [action, setAction] = useState('Login');
@@ -77,9 +77,8 @@ export default function Component({ onLoginSuccess }) {
       });
       const result = await response.json();
       if (response.ok) {
-        alert('Success: ' + result.message);
-        onLoginSuccess(); // Notify the parent component that the login was successful
-        navigate('/Dashboard'); // Redirect to the dashboard
+        onLoginSuccess(result.data.token); // Notify the parent component that the login was successful
+        // navigate('/Dashboard'); // Redirect to the dashboard
       } else {
         alert('Error: ' + result.message);
       }

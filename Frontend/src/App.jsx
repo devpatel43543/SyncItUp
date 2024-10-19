@@ -23,13 +23,15 @@
 // App.js
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import SignUp from './Signup.jsx';  // The login/sign-up component
-import Dashboard from './Dashboard';  // The dashboard component
+import SignUp from './pages/Signup.jsx';  // The login/sign-up page
+import Dashboard from './pages/Dashboard.jsx';  // The dashboard page
+import { AUTH_TOKEN } from "./utils/Constants.js";
 
 const App = () => {
-    const [isAuthenticated, setIsAuthenticated] = React.useState(false);
+    const [isAuthenticated, setIsAuthenticated] = React.useState(localStorage.getItem(AUTH_TOKEN));
 
-    const handleLoginSuccess = () => {
+    const handleLoginSuccess = (token) => {
+        localStorage.setItem(AUTH_TOKEN, token);
         setIsAuthenticated(true);  // Set authentication state to true after successful login
     };
 
