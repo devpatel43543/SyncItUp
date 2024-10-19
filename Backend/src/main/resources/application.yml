@@ -1,6 +1,14 @@
-#spring:
-#  profiles:
-#    active: local
-#  application:
-#      name: FundFusion
-#
+spring:
+  profiles:
+    active: local
+  application:
+      name: FundFusion
+  jpa:
+    defer-datasource-initialization: true
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+
+
