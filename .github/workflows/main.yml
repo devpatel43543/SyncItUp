@@ -15,4 +15,6 @@ jobs:
 
       - name: Deploy Application
         run: |
-          SPRING_PROFILE=dev docker-compose up -d
+          SPRING_PROFILE=dev docker-compose up --build --force-recreate -d
+
+
