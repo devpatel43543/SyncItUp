@@ -1,34 +1,72 @@
-import { useState } from 'react';
-import {BASE_URL, ENDPOINTS} from "./Constants.js";
+// Component.js
+import React, { useState } from 'react';
+import { BASE_URL, ENDPOINTS } from './Constants.js';
+import { useNavigate } from 'react-router-dom';
+import './App.css';
 
-const SignUp = () => {
-  const [action, setAction] = useState("Login"); // Toggles between Login and Sign Up
+export default function Component({ onLoginSuccess }) {
+  const [action, setAction] = useState('Login');
   const [formData, setFormData] = useState({
     username: '',
     name: '',
     email: '',
-    password: ''
+    password: '',
   });
+  const [errors, setErrors] = useState({
+    username: '',
+    name: '',
+    email: '',
+    password: '',
+  });
+
+  const navigate = useNavigate(); // React Router hook to navigate programmatically
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-
-    if (name === 'name') {
-
-      const regex = /^[A-Za-z]*$/;
-      if (!regex.test(value)) {
-        return;
-      }
-    }
-
     setFormData({ ...formData, [name]: value });
+    setErrors({ ...errors, [name]: '' });
+  };
+
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validateForm = () => {
+    const newErrors = {
+      username: '',
+      name: '',
+      email: '',
+      password: '',
+    };
+    if (!formData.username && action === 'Sign Up') {
+      newErrors.username = 'Username is required';
+    }
+    if (!formData.name && action === 'Sign Up') {
+      newErrors.name = 'Name is required';
+    }
+    if (!formData.email) {
+      newErrors.email = 'Email is required';
+    } else if (!validateEmail(formData.email)) {
+      newErrors.email = 'Invalid email format';
+    }
+    if (!formData.password) {
+      newErrors.password = 'Password is required';
+    } else if (formData.password.length < 8) {
+      newErrors.password = 'Password must be at least 8 characters long';
+    }
+    return newErrors;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const validationErrors = validateForm();
+    if (Object.values(validationErrors).some((error) => error !== '')) {
+      setErrors(validationErrors);
+      return;
+    }
 
-    const url = BASE_URL + (action === "Sign Up" ? ENDPOINTS.REGISTER : ENDPOINTS.LOGIN);
-
+    const url = BASE_URL + (action === 'Sign Up' ? ENDPOINTS.REGISTER : ENDPOINTS.LOGIN);
     try {
       const response = await fetch(url, {
         method: 'POST',
@@ -37,139 +75,134 @@ const SignUp = () => {
         },
         body: JSON.stringify(formData),
       });
-
       const result = await response.json();
       if (response.ok) {
-        alert('Success: ' + result);
+        alert('Success: ' + result.message);
+        onLoginSuccess(); // Notify the parent component that the login was successful
+        navigate('/Dashboard'); // Redirect to the dashboard
       } else {
-        alert('Error: ' + result);
+        alert('Error: ' + result.message);
       }
     } catch (error) {
       console.error('Error:', error);
     }
   };
 
-  const handleForgotPassword = () => {
-    console.log("Forgot password for email:", formData.email);
-    // Add forgot password logic here
-  };
-
   return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-100">
-        <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
-          <h2 className="text-2xl font-bold text-center text-gray-800">{action}</h2>
-
-          <form className="space-y-4" onSubmit={handleSubmit}>
-            {action === "Sign Up" && (
-                <div>
-                  <label htmlFor="name" className="text-left block text-sm font-medium text-gray-700">
-                    Name
-                  </label>
-                  <input
-                      type="text"
-                      name="name"
-                      id="name"
-                      value={formData.name}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                      required
-                  />
-                </div>
-            )}
-
-            {action === "Sign Up" && (
-                <div>
-                  <label htmlFor="email" className="text-left block text-sm font-medium text-gray-700">
-                    Email
-                  </label>
-                  <input
-                      type="email"
-                      name="email"
-                      id="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                      required
-                  />
-                </div>
-            )}
-
-            <div>
-              <label htmlFor="username" className="text-left block text-sm font-medium text-gray-700">
-                Username
-              </label>
-              <input
-                  type="text"
-                  name="username"
-                  id="username"
-                  value={formData.username}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                  required
-              />
+      <div className="h-screen flex flex-col lg:flex-row">
+        {/* Left Image Section */}
+        <div className="auth_img_section hidden lg:flex w-full lg:w-1/2 justify-center items-center bg-indigo-600">
+          <div className="w-full mx-auto px-20 flex-col items-center space-y-6 text-center lg:text-left">
+            <h1 className="text-white font-bold text-4xl font-sans">Fund Fusion</h1>
+            <p className="text-white mt-1">The simplest app to use</p>
+            <div className="flex justify-center lg:justify-start mt-6">
+              <a
+                  href="#"
+                  className="hover:bg-white hover:text-indigo-600 hover:-translate-y-1 transition-all duration-500 bg-transparent border-2 border-white text-white mt-4 px-4 py-2 rounded-2xl font-bold mb-2"
+              >
+                Get Started
+              </a>
             </div>
+          </div>
+        </div>
 
-            <div>
-              <label htmlFor="password" className="text-left block text-sm font-medium text-gray-700">
-                Password
-              </label>
-              <input
-                  type="password"
-                  name="password"
-                  id="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                  required
-              />
-            </div>
+        {/* Right Form Section */}
+        <div className="flex w-full lg:w-1/2 justify-center items-center bg-white space-y-8">
+          <div className="w-full px-8 md:px-32 lg:px-24">
+            <form className="bg-white rounded-md shadow-2xl p-5" onSubmit={handleSubmit}>
+              <h1 className="text-gray-800 font-bold text-2xl mb-1">
+                {action === 'Sign Up' ? 'Create an Account' : 'Welcome Back!'}
+              </h1>
+              <p className="text-sm font-normal text-gray-600 mb-8">
+                {action === 'Sign Up' ? 'Please fill the form' : 'Please login to your account'}
+              </p>
 
-            <button
-                type="submit"
-                className="w-full px-4 py-2 font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              {action === "Sign Up" ? "Sign Up" : "Login"}
-            </button>
-          </form>
+              {action === 'Sign Up' && (
+                  <>
+                    <div className="flex items-center border-2 mb-1 py-2 px-3 rounded-2xl">
+                      <input
+                          id="name"
+                          className="pl-2 w-full outline-none border-none"
+                          type="text"
+                          name="name"
+                          value={formData.name}
+                          onChange={handleChange}
+                          placeholder="Name"
+                          aria-label="Name"
+                      />
+                    </div>
+                    {errors.name && <p className="text-red-500 text-xs mb-4" aria-live="polite">{errors.name}</p>}
+                  </>
+              )}
 
-          {action === "Login" && (
-              <div className="text-right mt-2">
-                <button
-                    onClick={handleForgotPassword}
-                    className="text-sm text-indigo-600 hover:text-indigo-800 focus:outline-none"
-                >
-                  Forgot Password?
-                </button>
+              <div className="flex items-center border-2 mb-1 py-2 px-3 rounded-2xl">
+                <input
+                    id="email"
+                    className="pl-2 w-full outline-none border-none"
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="Email"
+                    aria-label="Email"
+                />
               </div>
-          )}
+              {errors.email && <p className="text-red-500 text-xs mb-4" aria-live="polite">{errors.email}</p>}
 
-          <div className="text-center mt-4">
-            {action === "Login" ? (
-                <p>
-                   Don&#39;t have an account?{' '}
+              {action === 'Sign Up' && (
+                  <>
+                    <div className="flex items-center border-2 mb-1 py-2 px-3 rounded-2xl">
+                      <input
+                          id="username"
+                          className="pl-2 w-full outline-none border-none"
+                          type="text"
+                          name="username"
+                          value={formData.username}
+                          onChange={handleChange}
+                          placeholder="Username"
+                          aria-label="Username"
+                      />
+                    </div>
+                    {errors.username && <p className="text-red-500 text-xs mb-4" aria-live="polite">{errors.username}</p>}
+                  </>
+              )}
+
+              <div className="flex items-center border-2 mb-1 py-2 px-3 rounded-2xl">
+                <input
+                    id="password"
+                    className="pl-2 w-full outline-none border-none"
+                    type="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="Password"
+                    aria-label="Password"
+                />
+              </div>
+              {errors.password && <p className="text-red-500 text-xs mb-4" aria-live="polite">{errors.password}</p>}
+
+              <button
+                  type="submit"
+                  className="block w-full bg-indigo-600 mt-5 py-2 rounded-2xl hover:bg-indigo-700 hover:-translate-y-1 transition-all duration-500 text-white font-semibold mb-2"
+              >
+                {action === 'Sign Up' ? 'Sign Up' : 'Login'}
+              </button>
+
+              <div className="text-center mt-4">
+                <p className="text-sm">
+                  {action === 'Sign Up' ? 'Already have an account?' : "Don't have an account?"}
                   <button
-                      className="text-indigo-600 hover:text-indigo-800"
-                      onClick={() => setAction("Sign Up")}
+                      onClick={() => setAction(action === 'Sign Up' ? 'Login' : 'Sign Up')}
+                      type="button"
+                      className="font-medium text-indigo-500 hover:text-indigo-600"
                   >
-                    Sign Up
+                    {action === 'Sign Up' ? 'Login' : 'Sign Up'}
                   </button>
                 </p>
-            ) : (
-                <p>
-                  Already have an account?{' '}
-                  <button
-                      className="text-indigo-600 hover:text-indigo-800"
-                      onClick={() => setAction("Login")}
-                  >
-                    Login
-                  </button>
-                </p>
-            )}
+              </div>
+            </form>
           </div>
         </div>
       </div>
   );
-};
-
-export default SignUp;
-
+}
