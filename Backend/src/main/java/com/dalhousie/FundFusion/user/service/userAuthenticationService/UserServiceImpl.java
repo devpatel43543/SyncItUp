@@ -15,7 +15,6 @@
     import com.dalhousie.FundFusion.user.entity.User;
     import com.dalhousie.FundFusion.user.repository.UserRepository;
     import com.dalhousie.FundFusion.user.requestEntity.AuthenticateRequest;
-    import com.dalhousie.FundFusion.user.requestEntity.ForgotPasswordRequest;
     import com.dalhousie.FundFusion.user.requestEntity.RegisterRequest;
     import com.dalhousie.FundFusion.user.responseEntity.AuthenticationResponse;
     import com.dalhousie.FundFusion.user.service.passwordResetService.ResetTokenService;
@@ -33,7 +32,6 @@
     import org.springframework.stereotype.Service;
     import jakarta.mail.internet.MimeMessage;
     import java.io.UnsupportedEncodingException;
-    import org.springframework.mail.javamail.MimeMessageHelper;
 
     import java.util.List;
     import java.util.Objects;
@@ -132,7 +130,7 @@
                 String resetToken = resetTokenService.createResetPasswordToken(user.getId()).getToken();
                 log.info("Generated token: {}", resetToken);
 
-                String resetPasswordLink = resetUrl + "?token=" + resetToken + "&email=" + email;
+                String resetPasswordLink = resetUrl + "&email=" + email + "?token=" + resetToken;
                 log.info("Reset password link: {}", resetPasswordLink);
 
                 sendMail(resetPasswordLink, email);
@@ -144,31 +142,26 @@
 
         @Override
         public void resetPassword(String email, String password, String token) {
-            // Step 1: Find user by email
             User user = userRepository.findByEmail(email)
                     .orElseThrow(() -> new UserNotFoundException("User not found with email: " + email));
 
-            // Step 2: Fetch the reset password token
-            PasswordReset resetPasswordTokenModel = resetTokenService.findByUserId(user.getId())
+            PasswordReset passwordReset = resetTokenService.findByUserId(user.getId())
                     .orElseThrow(() -> new TokenInvalidExaption("User did not initiate a reset password request."));
 
-            // Step 3: Validate token
-            if (!Objects.equals(token, resetPasswordTokenModel.getToken())) {
+            if (!Objects.equals(token, passwordReset.getToken())) {
                 throw new TokenInvalidExaption("Failed to authenticate token. Please request to reset your password again.");
             }
 
-            // Step 4: Check if the token is valid (not expired)
-            if (!resetTokenService.isTokenValid(resetPasswordTokenModel)) {
+            if (!resetTokenService.isTokenValid(passwordReset)) {
                 throw new TokenInvalidExaption("Token expired. Please request to reset your password again.");
             }
 
-            // Step 5: Update the user's password
             String newPassword = passwordEncoder.encode(password);
             userRepository.updatePassword(email, newPassword);
 
-            // Step 6: Delete the reset token after successful password reset
-            resetTokenService.deleteResetPasswordToken(resetPasswordTokenModel);
+            resetTokenService.deleteResetPasswordToken(passwordReset);
         }
+
         private void sendMail(String resetPasswordLink, String email) {
             String subject = "Reset Your Password";
             String content = "<p>Hello,</p>"
@@ -183,7 +176,7 @@
                 MimeMessage message = javaMailSender.createMimeMessage();
                 MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
-                helper.setFrom("your-email@gmail.com", "Your Name");
+                helper.setFrom("devpatel43543@gmail.com", "dev");
                 helper.setTo(email);
                 helper.setSubject(subject);
                 helper.setText(content, true);

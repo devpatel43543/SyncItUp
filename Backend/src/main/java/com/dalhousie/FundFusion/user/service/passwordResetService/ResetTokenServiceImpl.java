@@ -1,5 +1,6 @@
 package com.dalhousie.FundFusion.user.service.passwordResetService;
 
+import com.dalhousie.FundFusion.exaption.TokenExpiredException;
 import com.dalhousie.FundFusion.user.entity.PasswordReset;
 import com.dalhousie.FundFusion.user.repository.PasswordResetTokenRepository;
 import lombok.RequiredArgsConstructor;
@@ -48,6 +49,10 @@ public class ResetTokenServiceImpl implements ResetTokenService{
         if (token == null || token.getExpiryDate() == null) {
             return false;
         }
-        return token.getExpiryDate().isAfter(Instant.now());
+        if (token.getExpiryDate().isBefore(Instant.now())) {
+            throw new TokenExpiredException("token has expired.");
+        }
+
+        return true;
     }
 }
