@@ -62,7 +62,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         } catch (ExpiredJwtException | MalformedJwtException e) {
             // Token is invalid or expired, set response status and message
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
-            response.getWriter().write("User is Unauthorized. -> " + e.getMessage());
+            response.getWriter().write("user is Unauthorized. -> " + e.getMessage());
             return;
         }
 
@@ -72,6 +72,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
             if (jwtService.isTokenValid(jwt, userDetails)) {
+                boolean emailVerified = jwtService.isEmailVerified(jwt);
+                if (!emailVerified) {
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN, "Email not verified.");
+                    return; // Stop filter processing
+                }
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
                         null,

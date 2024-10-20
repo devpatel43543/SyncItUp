@@ -16,21 +16,19 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ResetTokenServiceImpl implements ResetTokenService{
     private final PasswordResetTokenRepository passwordResetTokenRepository;
-    private final long EXPIRATION_DURATION_MS = 1000L * 60 * 5;
+    private final long EXPIRATION_DURATION = 1000L * 60 * 10;
     @Override
     public PasswordReset createResetPasswordToken(Integer userId) {
 
         // If the user already has a reset token, delete it before creating a new one
         passwordResetTokenRepository.findByUserId(userId).ifPresent(passwordResetTokenRepository::delete);
 
-        // Create a new reset token with a random UUID and set the expiry date
         PasswordReset passwordReset = PasswordReset.builder()
                 .userId(userId)
                 .token(UUID.randomUUID().toString()) // Generate random token
-                .expiryDate(Instant.now().plusMillis(EXPIRATION_DURATION_MS)) // Set expiry 10 minutes from now
+                .expiryDate(Instant.now().plusMillis(EXPIRATION_DURATION))
                 .build();
         log.info(String.valueOf(passwordReset));
-        // Save the token in the repository and return
         return passwordResetTokenRepository.save(passwordReset);
     }
     @Override

@@ -18,8 +18,6 @@ spring:
           starttls:
             enable: true
             required: true
-          ssl:
-            protocols: TLSv1.2
   jpa:
     #defer-datasource-initialization: true
     hibernate:
