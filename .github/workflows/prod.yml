@@ -3,7 +3,7 @@ name: Deploy to Prod
 on:
   push:
     branches:
-      - main_ci_cd_test
+      - main
 
 jobs:
   deploy:
