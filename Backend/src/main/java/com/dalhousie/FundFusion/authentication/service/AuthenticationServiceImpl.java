@@ -1,4 +1,4 @@
-    package com.dalhousie.FundFusion.user.service.userAuthenticationService;
+    package com.dalhousie.FundFusion.authentication.service;
 
 
     import com.dalhousie.FundFusion.exception.TokenExpiredException;
@@ -46,7 +46,7 @@
     @Slf4j
     @Service
     @RequiredArgsConstructor
-    public class UserServiceImpl implements UserService {
+    public class AuthenticationServiceImpl implements AuthenticationService {
         private final UserRepository userRepository;
         private final PasswordEncoder passwordEncoder;
         private final JwtService jwtService;

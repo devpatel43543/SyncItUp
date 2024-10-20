@@ -3,7 +3,10 @@ package com.dalhousie.FundFusion.user.controller;
 import com.dalhousie.FundFusion.category.entity.Category;
 import com.dalhousie.FundFusion.dto.DateRangeEntity;
 import com.dalhousie.FundFusion.user.entity.UserTransaction;
+import com.dalhousie.FundFusion.user.requestEntity.UserTransactionRequest;
+import com.dalhousie.FundFusion.user.responseEntity.UserTransactionResponse;
 import com.dalhousie.FundFusion.user.service.UserTransactionService;
+import com.dalhousie.FundFusion.util.CustomResponseBody;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,8 +28,13 @@ public class UserTransactionController {
     }
 
     @PostMapping("/logTransaction")
-    public ResponseEntity<UserTransaction> logTransaction(@RequestBody @Valid UserTransaction userTransaction){
-        return new ResponseEntity<>( userTransactionService.logTransaction(userTransaction), HttpStatus.ACCEPTED);
+    public ResponseEntity<CustomResponseBody<UserTransactionResponse>> logTransaction(@RequestBody @Valid UserTransactionRequest userTransactionRequest){
+        CustomResponseBody<UserTransactionResponse> response = new CustomResponseBody<>(
+                CustomResponseBody.Result.SUCCESS,
+                userTransactionService.logTransaction(userTransactionRequest),
+                "Transaction logged successfully"
+        );
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PostMapping("/updateTransaction")

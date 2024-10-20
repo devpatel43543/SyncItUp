@@ -1,4 +1,4 @@
-package com.dalhousie.FundFusion.user.service.userAuthenticationService;
+package com.dalhousie.FundFusion.authentication.service;
 
 import com.dalhousie.FundFusion.user.requestEntity.AuthenticateRequest;
 import com.dalhousie.FundFusion.user.requestEntity.OtpVarificationRequest;
@@ -7,7 +7,7 @@ import com.dalhousie.FundFusion.user.responseEntity.AuthenticationResponse;
 import com.dalhousie.FundFusion.util.CustomResponseBody;
 import jakarta.servlet.http.HttpServletRequest;
 
-public interface UserService {
+public interface AuthenticationService {
     AuthenticationResponse registerUser(RegisterRequest registerRequest);
 
     AuthenticationResponse authenticateUser(AuthenticateRequest authenticateRequest);

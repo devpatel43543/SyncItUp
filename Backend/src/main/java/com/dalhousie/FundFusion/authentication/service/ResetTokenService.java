@@ -1,4 +1,4 @@
-package com.dalhousie.FundFusion.user.service.passwordResetService;
+package com.dalhousie.FundFusion.authentication.service;
 
 import com.dalhousie.FundFusion.user.entity.PasswordReset;
 

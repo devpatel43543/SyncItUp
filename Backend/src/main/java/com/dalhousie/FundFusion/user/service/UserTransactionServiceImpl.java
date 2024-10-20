@@ -1,9 +1,11 @@
 package com.dalhousie.FundFusion.user.service;
 
 import com.dalhousie.FundFusion.category.entity.Category;
-import com.dalhousie.FundFusion.category.repository.CategoryRepository;
+import com.dalhousie.FundFusion.category.service.CategoryService;
 import com.dalhousie.FundFusion.user.entity.UserTransaction;
 import com.dalhousie.FundFusion.user.repository.UserTransactionRepository;
+import com.dalhousie.FundFusion.user.requestEntity.UserTransactionRequest;
+import com.dalhousie.FundFusion.user.responseEntity.UserTransactionResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,18 +18,31 @@ import java.util.NoSuchElementException;
 public class UserTransactionServiceImpl implements  UserTransactionService{
 
     private final UserTransactionRepository userTransactionRepository;
-    private final CategoryRepository categoryRepository;
+    private final CategoryService categoryService;
+    private final UserService userService;
 
     @Override
-    public UserTransaction logTransaction(UserTransaction transaction){
+    public UserTransactionResponse logTransaction(UserTransactionRequest request){
+
+        UserTransaction transaction = UserTransaction.builder()
+                            .user(userService.getUser(request.getUserId()))
+                            .expense(request.getExpense())
+                            .category(categoryService.getCategory(request.getCategoryId()))
+                            .txnDesc(request.getTxnDesc())
+                            .txnDate(request.getTxnDate())
+                        .build();
+
         checkDate(transaction);
 
-        Category fetchedCategory = categoryRepository.findById(transaction.getCategory().getCategoryId())
-                        .orElseThrow(
-                                () -> new NoSuchElementException("Invalid Category ID:"+ transaction.getCategory().getCategoryId())
-                        );
-        transaction.setCategory(fetchedCategory);
-        return userTransactionRepository.save(transaction);
+        UserTransaction savedTransaction = userTransactionRepository.save(transaction);
+
+        return UserTransactionResponse.builder()
+                .txnDesc(savedTransaction.getTxnDesc())
+                .txnDate(savedTransaction.getTxnDate())
+                .expense(savedTransaction.getExpense())
+                .categoryId(savedTransaction.getCategory().getCategoryId())
+                .build();
+
     }
 
     @Override

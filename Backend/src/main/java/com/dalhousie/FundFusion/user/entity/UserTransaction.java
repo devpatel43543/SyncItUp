@@ -3,6 +3,7 @@ package com.dalhousie.FundFusion.user.entity;
 import com.dalhousie.FundFusion.category.entity.Category;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,6 +15,7 @@ import java.time.LocalDate;
 @Entity
 @Getter
 @Setter
+@Builder
 public class UserTransaction {
 
     @Id
