@@ -1,0 +1,16 @@
+spring:
+  application:
+  datasource:
+    url: jdbc:mysql://db-5308.cs.dal.ca:3306/CSCI5308_5_PRODUCTION
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: CSCI5308_5_PRODUCTION_USER
+    password: Yi9phaech9
+    initialization-mode: always
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+server:
+  port: 8081

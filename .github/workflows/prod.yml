@@ -1,10 +1,10 @@
-name: Deploy to Server
+name: Deploy to Prod
 
 on:
   push:
     branches:
-      - dev
-      
+      - main
+
 jobs:
   deploy:
     runs-on: self-hosted
@@ -15,6 +15,6 @@ jobs:
 
       - name: Deploy Application
         run: |
-          SPRING_PROFILE=dev docker-compose up --build --force-recreate -d
+          PROFILE=prod docker-compose --verbose up --build --force-recreate -d
 
 
