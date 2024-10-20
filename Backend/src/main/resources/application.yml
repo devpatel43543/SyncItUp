@@ -3,12 +3,6 @@ spring:
     active: local
   application:
       name: FundFusion
-  jpa:
-    defer-datasource-initialization: true
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
   mail:
     host: smtp.gmail.com
     port: 587
@@ -21,8 +15,14 @@ spring:
           starttls:
             enable: true
             required: true
-          ssl:
-            protocols: TLSv1.2
+
+  jpa:
+    defer-datasource-initialization: true
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
 
 
 

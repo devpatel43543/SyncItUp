@@ -31,10 +31,19 @@ public class JwtServiceImpl implements JwtService{
         }
     }
 
-
+    public boolean isEmailVerified(String jwtToken) {
+        try {
+            return extractClaim(jwtToken, claims -> claims.get("emailVerified", Boolean.class));
+        } catch (Exception exception) {
+            log.error("Exception occurred while extracting email verification status: {}", exception.getMessage());
+            return false;
+        }
+    }
     @Override
-    public String generateToken(UserDetails userDetails) {
-        return buildToken(new HashMap<>(), userDetails);
+    public String generateToken(UserDetails userDetails, boolean isEmailVerified) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("emailVerified", isEmailVerified); // Add email verification status to claims
+        return buildToken(claims, userDetails);
     }
 
     @Override
@@ -79,15 +88,9 @@ public class JwtServiceImpl implements JwtService{
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                // For now setting token expiration to 10 days
-                // [TODO]: Setup refresh token concept for updating expired tokens
                 .setExpiration(new Date(
                         System.currentTimeMillis() +
-                                1000L/*Milli seconds*/ *
-                                        60/*Seconds*/ *
-                                        60/*Minutes*/ *
-                                        24/*Hours*/ *
-                                        10/*Days*/
+                                1000L * 60 * 60 * 24 * 20 // 20 days
                 ))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();

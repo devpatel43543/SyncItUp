@@ -2,12 +2,10 @@ package com.dalhousie.FundFusion.user.controller;
 
 import com.dalhousie.FundFusion.exception.TokenExpiredException;
 import com.dalhousie.FundFusion.exception.UserNotFoundException;
+import com.dalhousie.FundFusion.user.entity.Otp;
 import com.dalhousie.FundFusion.user.repository.PasswordResetTokenRepository;
 import com.dalhousie.FundFusion.user.repository.UserRepository;
-import com.dalhousie.FundFusion.user.requestEntity.AuthenticateRequest;
-import com.dalhousie.FundFusion.user.requestEntity.ForgotPasswordRequest;
-import com.dalhousie.FundFusion.user.requestEntity.RegisterRequest;
-import com.dalhousie.FundFusion.user.requestEntity.ResetPasswordRequest;
+import com.dalhousie.FundFusion.user.requestEntity.*;
 import com.dalhousie.FundFusion.user.responseEntity.AuthenticationResponse;
 import com.dalhousie.FundFusion.user.service.userAuthenticationService.UserService;
 import com.dalhousie.FundFusion.util.CustomResponseBody;
@@ -15,10 +13,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.Optional;
 
 @RestController
 @RequestMapping("api/check")
@@ -36,12 +38,40 @@ public class AuthenticationController {
         try {
             AuthenticationResponse authenticationResponse = userService.registerUser(registerRequest);
             log.info("User registered successfully with email: {}", registerRequest.getEmail());
-            CustomResponseBody<AuthenticationResponse> responseBody =new CustomResponseBody<>(CustomResponseBody.Result.SUCCESS,authenticationResponse,"user registered successfully");
+            CustomResponseBody<AuthenticationResponse> responseBody =new CustomResponseBody<>(CustomResponseBody.Result.SUCCESS,authenticationResponse,"user registered successfully, verify email");
             return ResponseEntity.status(HttpStatus.CREATED).body(responseBody);
         }  catch (Exception e) {
             log.error("Unexpected error during user registration: {}", e.getMessage());
             CustomResponseBody<AuthenticationResponse> responseBody = new CustomResponseBody<>(CustomResponseBody.Result.FAILURE, null, "Something went wrong");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseBody);
+        }
+    }
+    @PostMapping("/verifyOtp")
+    public ResponseEntity<CustomResponseBody<AuthenticationResponse>> verifyOtp(@RequestBody OtpVarificationRequest otpVarificationRequest){
+        try{
+            AuthenticationResponse authenticationResponse = userService.verifyOtp(otpVarificationRequest);
+            CustomResponseBody<AuthenticationResponse> responseBody =new CustomResponseBody<>(CustomResponseBody.Result.SUCCESS,authenticationResponse,"verified email successfully");
+            return ResponseEntity.status(HttpStatus.OK).body(responseBody);
+        }catch (TokenExpiredException e) {
+            log.error("OTP expired: {}", e.getMessage());
+            CustomResponseBody<AuthenticationResponse> responseBody = new CustomResponseBody<>(CustomResponseBody.Result.FAILURE, null, e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseBody);
+        } catch (Exception e) {
+            log.error("Unexpected error: {}", e.getMessage());
+            CustomResponseBody<AuthenticationResponse> responseBody = new CustomResponseBody<>(CustomResponseBody.Result.FAILURE, null, "Something went wrong");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseBody);
+        }
+    }
+    @PostMapping("/resendOtp")
+    public ResponseEntity<CustomResponseBody<String>> resendOtp() {
+        try {
+            userService.resendOtp();
+            CustomResponseBody<String> responseBody = new CustomResponseBody<>(CustomResponseBody.Result.SUCCESS,null,"otp resented successfully");
+            return ResponseEntity.status(HttpStatus.CREATED).body(responseBody);
+        }catch (Exception e) {
+            log.error("Unexpected error: {}", e.getMessage());
+            CustomResponseBody<String> responseBody = new CustomResponseBody<>(CustomResponseBody.Result.FAILURE, null, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseBody);
         }
     }
 

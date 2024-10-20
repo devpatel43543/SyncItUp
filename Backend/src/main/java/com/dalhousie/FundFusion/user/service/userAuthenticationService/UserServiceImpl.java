@@ -1,6 +1,7 @@
     package com.dalhousie.FundFusion.user.service.userAuthenticationService;
 
 
+    import com.dalhousie.FundFusion.exception.TokenExpiredException;
     import com.dalhousie.FundFusion.exception.TokenInvalidExaption;
     import com.dalhousie.FundFusion.exception.UserAlreadyExistException;
     import com.dalhousie.FundFusion.exception.UserNotFoundException;
@@ -11,13 +12,18 @@
     import com.dalhousie.FundFusion.group.repository.PendingGroupMembersRepository;
     import com.dalhousie.FundFusion.group.repository.UserGroupRepository;
     import com.dalhousie.FundFusion.jwt.JwtService;
+    import com.dalhousie.FundFusion.user.entity.Otp;
     import com.dalhousie.FundFusion.user.entity.PasswordReset;
     import com.dalhousie.FundFusion.user.entity.User;
+    import com.dalhousie.FundFusion.user.repository.OtpRepository;
     import com.dalhousie.FundFusion.user.repository.UserRepository;
     import com.dalhousie.FundFusion.user.requestEntity.AuthenticateRequest;
+    import com.dalhousie.FundFusion.user.requestEntity.OtpVarificationRequest;
     import com.dalhousie.FundFusion.user.requestEntity.RegisterRequest;
     import com.dalhousie.FundFusion.user.responseEntity.AuthenticationResponse;
+    import com.dalhousie.FundFusion.user.service.emailValidationService.OtpService;
     import com.dalhousie.FundFusion.user.service.passwordResetService.ResetTokenService;
+    import com.dalhousie.FundFusion.util.CustomResponseBody;
     import jakarta.mail.MessagingException;
     import jakarta.servlet.http.HttpServletRequest;
     import jakarta.transaction.Transactional;
@@ -35,6 +41,7 @@
 
     import java.util.List;
     import java.util.Objects;
+    import java.util.Optional;
 
     @Slf4j
     @Service
@@ -47,29 +54,36 @@
         private final GroupRepository groupRepository;
         private final PendingGroupMembersRepository pendingGroupMembershipRepository;
         private final UserGroupRepository userGroupRepository;
-        private final int frontendPort = 3000;
+        private final int frontendPort = 5173;
         private final ResetTokenService resetTokenService;
         private final JavaMailSender javaMailSender;
+        private final OtpService otpService;
+        private final OtpRepository otpRepository;
+        private Integer registerdUserId;
         @Transactional
         @Override
         public AuthenticationResponse registerUser(RegisterRequest registerRequest) {
             if(userRepository.findByEmail(registerRequest.getEmail()).isPresent()){
                 new UserAlreadyExistException("provided user is already exists");
             }
-            var userModel = User.builder()
+            var user = User.builder()
                     .name(registerRequest.getName())
                     .email(registerRequest.getEmail())
                     .password(passwordEncoder.encode(registerRequest.getPassword()))
+                    .isEmailVerified(false)
                     .build();
-            userRepository.save(userModel);
-            var jwtToken = jwtService.generateToken(userModel);
+            userRepository.save(user);
+            registerdUserId = user.getId();
+            Otp otp = otpService.generateOtp(user.getId());
+            log.info("line 77: {}", otp);
+            otpMailBody(otp.getOtp(), user.getEmail());
+
             List<PendingGroupMembers> pendingGroupMemberships = pendingGroupMembershipRepository.findByEmail(registerRequest.getEmail());
-            //transfer into group, registered user is in PendingGroupMembership table
             for (PendingGroupMembers pendingGroupMembership : pendingGroupMemberships) {
 
                 Group group = pendingGroupMembership.getGroup();
                 UserGroup userGroup = UserGroup.builder()
-                        .user(userModel)
+                        .user(user)
                         .group(group)
                         .userEmail(registerRequest.getEmail())
                         .build();
@@ -78,7 +92,7 @@
             }
 
             return AuthenticationResponse.builder()
-                    .token(jwtToken)
+                    .token(null)
                     .build();
         }
 
@@ -99,7 +113,11 @@
             log.info("line 56");
             var user = userRepository.findByEmail(authenticateRequest.getEmail()).get();
             log.info("line 58:{}",user);
-            var jwtToken = jwtService.generateToken(user);
+
+            if (!user.isEmailVerified()) {
+                throw new RuntimeException("Email not verified. Please verify before logging in.");
+            }
+            var jwtToken = jwtService.generateToken(user,user.isEmailVerified());
             log.info("line 59:{} ", jwtToken);
             return AuthenticationResponse.builder()
                     .token(jwtToken)
@@ -133,11 +151,33 @@
                 String resetPasswordLink = resetUrl + "&email=" + email + "?token=" + resetToken;
                 log.info("Reset password link: {}", resetPasswordLink);
 
-                sendMail(resetPasswordLink, email);
+                //sendMail(resetPasswordLink, email);
+                forgotPasswordMailBody(resetPasswordLink,email);
             } catch (Exception e) {
                 log.error("Error in forgotPassword: {}", e.getMessage());
                 throw e;  // rethrow to handle at the controller level
             }
+        }
+
+        private void forgotPasswordMailBody(String resetPasswordLink, String email) {
+            String subject = "Reset Your Password";
+            String content = "<p>Hello,</p>"
+                    + "<p>You have requested to reset your password. Please click the link below to create a new password. This link is valid for only 5 minutes for your security.</p>"
+                    + "<p>If you did not request this change, please ignore this email.</p>"
+                    + "<p>Click the link below to reset your password:</p>"
+                    + "<p><a href=\"" + resetPasswordLink + "\">Reset My Password</a></p>"
+                    + "<p>For your safety, please do not share this link with anyone.</p>"
+                    + "<p>Thank you!</p>";
+            sendMail(subject,content,email);
+        }
+
+        private void otpMailBody(String otp,String mail){
+            String subject = "Verify Your Email";
+            String content = "<p>Hello,</p>"
+                    + "<p>Your OTP for email verification is:</p>"
+                    + "<h2>" + otp + "</h2>"
+                    + "<p>This OTP is valid for 5 minutes.</p>";
+            sendMail(subject,content,mail);
         }
 
         @Override
@@ -162,16 +202,45 @@
             resetTokenService.deleteResetPasswordToken(passwordReset);
         }
 
-        private void sendMail(String resetPasswordLink, String email) {
-            String subject = "Reset Your Password";
-            String content = "<p>Hello,</p>"
-                    + "<p>You have requested to reset your password. Please click the link below to create a new password. This link is valid for only 5 minutes for your security.</p>"
-                    + "<p>If you did not request this change, please ignore this email.</p>"
-                    + "<p>Click the link below to reset your password:</p>"
-                    + "<p><a href=\"" + resetPasswordLink + "\">Reset My Password</a></p>"
-                    + "<p>For your safety, please do not share this link with anyone.</p>"
-                    + "<p>Thank you!</p>";
+        @Override
+        public AuthenticationResponse verifyOtp(OtpVarificationRequest otpVarificationRequest) {
+            Optional<Otp> otpOptional = otpService.findByOtp(otpVarificationRequest.getOtp());
+            if (otpOptional.isEmpty()) {
+                throw new TokenExpiredException("Invalid OTP. Please try again.");
+            }
+            Otp otp = otpOptional.get();
+            if (!otpService.isOtpValid(otp)) {
+                throw new TokenExpiredException("OTP has expired. Please request a new one.");
+            }
+            //mark user verified
+            User user = userRepository.findById(otp.getUserId())
+                    .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + otp.getUserId()));
+            user.setEmailVerified(true);
+            userRepository.save(user);
 
+            String jwtToken = jwtService.generateToken(user, user.isEmailVerified());
+
+            otpService.deleteOtp(otp);
+
+//            CustomResponseBody<String> responseBody = new CustomResponseBody<>(CustomResponseBody.Result.SUCCESS, "Email verified successfully", "OTP verified successfully.");
+            return AuthenticationResponse.builder().token(jwtToken).build();
+        }
+        @Transactional
+        public void resendOtp(){
+            log.info("line number 230:{}",registerdUserId);
+            Otp otp = otpService.resendOtp(registerdUserId);
+            log.info("line 232: {}", otp);
+            Optional<User> user = userRepository.findById(registerdUserId);
+            log.info("line number 234:{}",user.get().getEmail());
+            if (!user.isPresent()) {
+                throw new UserNotFoundException("User not found with ID: " + registerdUserId);
+            }
+            otpMailBody(otp.getOtp(), user.get().getEmail());
+        }
+
+
+
+        private void sendMail(String subject,String content, String email) {
             try {
                 MimeMessage message = javaMailSender.createMimeMessage();
                 MimeMessageHelper helper = new MimeMessageHelper(message, true);
