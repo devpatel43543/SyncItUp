@@ -6,20 +6,6 @@ spring:
     username: CSCI5308_5_DEVINT_USER
     password: Yi9phaech9
     initialization-mode: always
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: devpatel43543@gmail.com
-    password: dfjragryfjtqnkwp
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-            required: true
-          ssl:
-            protocols: TLSv1.2
   jpa:
     #defer-datasource-initialization: true
     hibernate:
