@@ -20,6 +20,10 @@ function App() {
         setIsAuthenticated(false);
     };
 
+    const handleOtpVerificationSuccess = () => {
+        setIsAuthenticated(true);  
+    };
+
     return (
         <Router>
             <Routes>
@@ -29,7 +33,10 @@ function App() {
                         isAuthenticated ? <Navigate to="/Dashboard" /> : <SignUp onLoginSuccess={handleLoginSuccess} />
                     }
                 />
-                <Route path="/verify-otp" element={<VerifyOtp />} />
+                <Route
+                    path="/verify-otp"
+                    element={<VerifyOtp onOtpVerificationSuccess={handleOtpVerificationSuccess} />}
+                />
                 <Route
                     path="/Dashboard"
                     element={

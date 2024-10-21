@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { BASE_URL, ENDPOINTS } from '../utils/Constants.js';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-export default function VerifyOTP() {
+export default function VerifyOTP({ onOtpVerificationSuccess }) {
     const [otp, setOtp] = useState('');
     const [error, setError] = useState('');
     const location = useLocation(); // To access the email passed from the sign-up page
@@ -28,7 +28,8 @@ export default function VerifyOTP() {
             const result = await response.json();
             if (response.ok) {
                 alert('OTP Verified! Your account is now active.');
-                navigate('/Dashboard'); // Redirect to login page after successful verification
+                onOtpVerificationSuccess();
+                navigate('/Dashboard');
             } else {
                 setError(result.message || 'Invalid OTP');
             }
