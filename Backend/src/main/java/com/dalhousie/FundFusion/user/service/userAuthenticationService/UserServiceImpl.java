@@ -148,7 +148,7 @@
                 String resetToken = resetTokenService.createResetPasswordToken(user.getId()).getToken();
                 log.info("Generated token: {}", resetToken);
 
-                String resetPasswordLink = resetUrl + "&email=" + email + "?token=" + resetToken;
+                String resetPasswordLink = resetUrl + "?email=" + email + "&token=" + resetToken;
                 log.info("Reset password link: {}", resetPasswordLink);
 
                 //sendMail(resetPasswordLink, email);
