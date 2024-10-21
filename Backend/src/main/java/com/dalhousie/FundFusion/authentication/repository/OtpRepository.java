@@ -1,10 +1,9 @@
-package com.dalhousie.FundFusion.user.repository;
+package com.dalhousie.FundFusion.authentication.repository;
 
-import com.dalhousie.FundFusion.user.entity.Otp;
+import com.dalhousie.FundFusion.authentication.entity.Otp;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import javax.swing.text.html.Option;
 import java.util.Optional;
 
 @Repository

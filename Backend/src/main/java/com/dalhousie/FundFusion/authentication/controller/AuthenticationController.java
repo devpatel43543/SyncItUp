@@ -1,33 +1,28 @@
-package com.dalhousie.FundFusion.user.controller;
+package com.dalhousie.FundFusion.authentication.controller;
 
+import com.dalhousie.FundFusion.authentication.requestEntity.*;
 import com.dalhousie.FundFusion.exception.TokenExpiredException;
 import com.dalhousie.FundFusion.exception.UserNotFoundException;
-import com.dalhousie.FundFusion.user.entity.Otp;
-import com.dalhousie.FundFusion.user.repository.PasswordResetTokenRepository;
+import com.dalhousie.FundFusion.authentication.repository.PasswordResetTokenRepository;
 import com.dalhousie.FundFusion.user.repository.UserRepository;
-import com.dalhousie.FundFusion.user.requestEntity.*;
-import com.dalhousie.FundFusion.user.responseEntity.AuthenticationResponse;
-import com.dalhousie.FundFusion.user.service.userAuthenticationService.UserService;
+import com.dalhousie.FundFusion.authentication.responseEntity.AuthenticationResponse;
+import com.dalhousie.FundFusion.authentication.service.AuthenticationService;
 import com.dalhousie.FundFusion.util.CustomResponseBody;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.Optional;
 
 @RestController
 @RequestMapping("api/check")
 @RequiredArgsConstructor
 @Slf4j
 public class AuthenticationController {
-    private final UserService userService;
+    private final AuthenticationService authenticationService;
     private final UserRepository userRepository;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
 
@@ -36,7 +31,7 @@ public class AuthenticationController {
     @PostMapping("/register")
     public ResponseEntity<CustomResponseBody<AuthenticationResponse>> register(@Valid @RequestBody RegisterRequest registerRequest) {
         try {
-            AuthenticationResponse authenticationResponse = userService.registerUser(registerRequest);
+            AuthenticationResponse authenticationResponse = authenticationService.registerUser(registerRequest);
             log.info("User registered successfully with email: {}", registerRequest.getEmail());
             CustomResponseBody<AuthenticationResponse> responseBody =new CustomResponseBody<>(CustomResponseBody.Result.SUCCESS,authenticationResponse,"user registered successfully, verify email");
             return ResponseEntity.status(HttpStatus.CREATED).body(responseBody);
@@ -49,7 +44,7 @@ public class AuthenticationController {
     @PostMapping("/verifyOtp")
     public ResponseEntity<CustomResponseBody<AuthenticationResponse>> verifyOtp(@RequestBody OtpVarificationRequest otpVarificationRequest){
         try{
-            AuthenticationResponse authenticationResponse = userService.verifyOtp(otpVarificationRequest);
+            AuthenticationResponse authenticationResponse = authenticationService.verifyOtp(otpVarificationRequest);
             CustomResponseBody<AuthenticationResponse> responseBody =new CustomResponseBody<>(CustomResponseBody.Result.SUCCESS,authenticationResponse,"verified email successfully");
             return ResponseEntity.status(HttpStatus.OK).body(responseBody);
         }catch (TokenExpiredException e) {
@@ -65,7 +60,7 @@ public class AuthenticationController {
     @PostMapping("/resendOtp")
     public ResponseEntity<CustomResponseBody<String>> resendOtp() {
         try {
-            userService.resendOtp();
+            authenticationService.resendOtp();
             CustomResponseBody<String> responseBody = new CustomResponseBody<>(CustomResponseBody.Result.SUCCESS,null,"otp resented successfully");
             return ResponseEntity.status(HttpStatus.CREATED).body(responseBody);
         }catch (Exception e) {
@@ -80,7 +75,7 @@ public class AuthenticationController {
     public ResponseEntity<CustomResponseBody<AuthenticationResponse>> login(@Valid @RequestBody AuthenticateRequest authenticateRequest) {
         try {
             log.info("Authenticating user: {}", authenticateRequest.getEmail());
-            AuthenticationResponse authenticationResponse = userService.authenticateUser(authenticateRequest);
+            AuthenticationResponse authenticationResponse = authenticationService.authenticateUser(authenticateRequest);
             CustomResponseBody<AuthenticationResponse> responseBody = new CustomResponseBody<>(CustomResponseBody.Result.SUCCESS, authenticationResponse, "user login successfully");
             return ResponseEntity.status(HttpStatus.OK).body(responseBody); // Changed status to OK
         } catch (UserNotFoundException e) {
@@ -98,9 +93,9 @@ public class AuthenticationController {
     @PostMapping("/forgotPassword")
     public ResponseEntity<CustomResponseBody<String>> forgotPassword(HttpServletRequest servletRequest, @Valid @RequestBody ForgotPasswordRequest forgotPasswordRequest) {
         try {
-            String resetUrl = userService.getURL(servletRequest) + "/passwordReset";
+            String resetUrl = authenticationService.getURL(servletRequest) + "/password_reset";
             log.info(resetUrl);
-            userService.forgotPassword(forgotPasswordRequest.getEmail(), resetUrl);
+            authenticationService.forgotPassword(forgotPasswordRequest.getEmail(), resetUrl);
             CustomResponseBody<String> responseBody = new CustomResponseBody<>(CustomResponseBody.Result.SUCCESS, "Reset link sent successfully", "Reset link sent");
             return ResponseEntity.status(HttpStatus.OK).body(responseBody);
         } catch (UserNotFoundException e) {
@@ -118,7 +113,7 @@ public class AuthenticationController {
     @PostMapping("/passwordReset")
     public ResponseEntity<CustomResponseBody<String>>resetPassword(@Valid @RequestBody ResetPasswordRequest resetPasswordRequest) {
         try{
-            userService.resetPassword(resetPasswordRequest.getEmail(),resetPasswordRequest.getPassword(),resetPasswordRequest.getToken());
+            authenticationService.resetPassword(resetPasswordRequest.getEmail(),resetPasswordRequest.getPassword(),resetPasswordRequest.getToken());
             CustomResponseBody<String> responseBody = new CustomResponseBody<>(CustomResponseBody.Result.SUCCESS, "Password reset successfully", "Password reset successfully");
             return ResponseEntity.status(HttpStatus.OK).body(responseBody);
         }catch (TokenExpiredException e) {

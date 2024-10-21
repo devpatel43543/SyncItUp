@@ -5,11 +5,18 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AuthenticationResponse {
-    private String token;
+public class UserTransactionResponse {
+
+    private Integer txnId;
+    private String txnDesc;
+    private Float expense;
+    private LocalDate txnDate;
+    private Integer categoryId;
+
 }

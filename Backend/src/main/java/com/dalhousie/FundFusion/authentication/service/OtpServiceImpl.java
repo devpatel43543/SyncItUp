@@ -1,13 +1,11 @@
-    package com.dalhousie.FundFusion.user.service.emailValidationService;
+    package com.dalhousie.FundFusion.authentication.service;
 
     import com.dalhousie.FundFusion.exception.TokenExpiredException;
-    import com.dalhousie.FundFusion.user.entity.Otp;
-    import com.dalhousie.FundFusion.user.entity.PasswordReset;
-    import com.dalhousie.FundFusion.user.repository.OtpRepository;
+    import com.dalhousie.FundFusion.authentication.entity.Otp;
+    import com.dalhousie.FundFusion.authentication.repository.OtpRepository;
     import jakarta.transaction.Transactional;
     import lombok.RequiredArgsConstructor;
     import org.springframework.stereotype.Service;
-    import org.springframework.web.bind.annotation.RequestMapping;
 
     import java.time.Instant;
     import java.util.Optional;

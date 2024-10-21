@@ -1,13 +1,11 @@
 package com.dalhousie.FundFusion.group.controller;
 
 
-import com.dalhousie.FundFusion.group.entity.Group;
 import com.dalhousie.FundFusion.group.requestEntity.GroupRequest;
 import com.dalhousie.FundFusion.group.requestEntity.GroupUpdateRequest;
 import com.dalhousie.FundFusion.group.responseEntity.GroupResponse;
 import com.dalhousie.FundFusion.group.responseEntity.GroupSummaryResponse;
 import com.dalhousie.FundFusion.group.service.GroupService;
-import com.dalhousie.FundFusion.user.responseEntity.AuthenticationResponse;
 import com.dalhousie.FundFusion.util.CustomResponseBody;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
