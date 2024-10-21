@@ -1,7 +1,6 @@
-package com.dalhousie.FundFusion.user.repository;
+package com.dalhousie.FundFusion.authentication.repository;
 
-import com.dalhousie.FundFusion.user.entity.PasswordReset;
-import com.dalhousie.FundFusion.user.entity.User;
+import com.dalhousie.FundFusion.authentication.entity.PasswordReset;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

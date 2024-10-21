@@ -1,8 +1,8 @@
 package com.dalhousie.FundFusion.authentication.service;
 
 import com.dalhousie.FundFusion.exception.TokenExpiredException;
-import com.dalhousie.FundFusion.user.entity.PasswordReset;
-import com.dalhousie.FundFusion.user.repository.PasswordResetTokenRepository;
+import com.dalhousie.FundFusion.authentication.entity.PasswordReset;
+import com.dalhousie.FundFusion.authentication.repository.PasswordResetTokenRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

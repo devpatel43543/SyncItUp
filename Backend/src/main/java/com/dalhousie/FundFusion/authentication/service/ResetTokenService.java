@@ -1,6 +1,6 @@
 package com.dalhousie.FundFusion.authentication.service;
 
-import com.dalhousie.FundFusion.user.entity.PasswordReset;
+import com.dalhousie.FundFusion.authentication.entity.PasswordReset;
 
 import java.util.Optional;
 

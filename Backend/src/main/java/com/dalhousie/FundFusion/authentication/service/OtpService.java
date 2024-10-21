@@ -1,6 +1,6 @@
-package com.dalhousie.FundFusion.user.service.emailValidationService;
+package com.dalhousie.FundFusion.authentication.service;
 
-import com.dalhousie.FundFusion.user.entity.Otp;
+import com.dalhousie.FundFusion.authentication.entity.Otp;
 
 import java.util.Optional;
 

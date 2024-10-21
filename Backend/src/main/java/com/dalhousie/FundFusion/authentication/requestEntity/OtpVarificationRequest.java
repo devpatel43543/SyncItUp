@@ -1,4 +1,4 @@
-package com.dalhousie.FundFusion.user.requestEntity;
+package com.dalhousie.FundFusion.authentication.requestEntity;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;

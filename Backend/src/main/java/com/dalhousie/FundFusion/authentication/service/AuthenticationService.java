@@ -1,10 +1,9 @@
 package com.dalhousie.FundFusion.authentication.service;
 
-import com.dalhousie.FundFusion.user.requestEntity.AuthenticateRequest;
-import com.dalhousie.FundFusion.user.requestEntity.OtpVarificationRequest;
-import com.dalhousie.FundFusion.user.requestEntity.RegisterRequest;
-import com.dalhousie.FundFusion.user.responseEntity.AuthenticationResponse;
-import com.dalhousie.FundFusion.util.CustomResponseBody;
+import com.dalhousie.FundFusion.authentication.requestEntity.AuthenticateRequest;
+import com.dalhousie.FundFusion.authentication.requestEntity.OtpVarificationRequest;
+import com.dalhousie.FundFusion.authentication.requestEntity.RegisterRequest;
+import com.dalhousie.FundFusion.authentication.responseEntity.AuthenticationResponse;
 import jakarta.servlet.http.HttpServletRequest;
 
 public interface AuthenticationService {
