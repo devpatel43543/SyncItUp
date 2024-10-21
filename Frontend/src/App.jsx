@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-d
 import SignUp from './pages/Signup.jsx';
 import VerifyOtp from './pages/Otp-verification.jsx';
 import Dashboard from './pages/Dashboard.jsx';
+import ForgotPassword from './pages/Forget-password.jsx';
 import { AUTH_TOKEN } from './utils/Constants.js';
 
 function App() {
@@ -34,6 +35,7 @@ function App() {
                         isAuthenticated ? <Dashboard onLogout={handleLogout} /> : <Navigate to="/" />
                     }
                 />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
             </Routes>
         </Router>
     );
