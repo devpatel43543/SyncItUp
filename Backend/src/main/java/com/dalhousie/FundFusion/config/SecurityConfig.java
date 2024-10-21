@@ -2,6 +2,7 @@ package com.dalhousie.FundFusion.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -11,6 +12,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.stream.IntStream;
 
 @Configuration
 @EnableWebSecurity
@@ -22,6 +25,7 @@ public class SecurityConfig {
     private final AuthenticationProvider authenticationProvider;
 
     @Bean
+    @Profile("!local")
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(req -> req
@@ -32,6 +36,20 @@ public class SecurityConfig {
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .authenticationProvider(authenticationProvider);
 
+        return http.build();
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChainLocal(HttpSecurity http) throws Exception{
+        http.csrf(AbstractHttpConfigurer::disable)
+                .headers(header ->
+                        header.frameOptions(
+                                frameOption -> frameOption.sameOrigin()
+                        )
+                )
+                .authorizeHttpRequests(
+                        request -> request.anyRequest().permitAll()
+                );
 
         return http.build();
     }
