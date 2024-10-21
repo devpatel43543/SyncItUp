@@ -1,4 +1,3 @@
-// Component.js
 import React, { useState } from 'react';
 import { AUTH_TOKEN, BASE_URL, ENDPOINTS } from '../utils/Constants.js';
 import { useNavigate } from 'react-router-dom';
@@ -19,12 +18,16 @@ export default function Component({ onLoginSuccess }) {
     password: '',
   });
 
-  const navigate = useNavigate(); // React Router hook to navigate programmatically
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
     setErrors({ ...errors, [name]: '' });
+  };
+
+  const handleForgotPasswordClick = () => {
+    navigate('/forgot-password');
   };
 
   const validateEmail = (email) => {
@@ -77,19 +80,23 @@ export default function Component({ onLoginSuccess }) {
       });
       const result = await response.json();
       if (response.ok) {
-        onLoginSuccess(result.data.token); // Notify the parent component that the login was successful
-        // navigate('/Dashboard'); // Redirect to the dashboard
+        if (action === 'Sign Up') {
+          navigate('/verify-otp', { state: { email: formData.email } });
+        } else {
+          onLoginSuccess(result.data.token);
+        }
       } else {
-        alert('Error: ' + result.message);
+        // alert('Error: ' + result.message);
       }
     } catch (error) {
       console.error('Error:', error);
     }
   };
 
+
   return (
       <div className="h-screen flex flex-col lg:flex-row">
-        {/* Left Image Section */}
+        {/* Left Image part */}
         <div className="auth_img_section hidden lg:flex w-full lg:w-1/2 justify-center items-center bg-indigo-600">
           <div className="w-full mx-auto px-20 flex-col items-center space-y-6 text-center lg:text-left">
             <h1 className="text-white font-bold text-4xl font-sans">Fund Fusion</h1>
@@ -105,7 +112,7 @@ export default function Component({ onLoginSuccess }) {
           </div>
         </div>
 
-        {/* Right Form Section */}
+        {/* Right Form part */}
         <div className="flex w-full lg:w-1/2 justify-center items-center bg-white space-y-8">
           <div className="w-full px-8 md:px-32 lg:px-24">
             <form className="bg-white rounded-md shadow-2xl p-5" onSubmit={handleSubmit}>
@@ -179,7 +186,17 @@ export default function Component({ onLoginSuccess }) {
                 />
               </div>
               {errors.password && <p className="text-red-500 text-xs mb-4" aria-live="polite">{errors.password}</p>}
-
+              {action === 'Login' && (
+                  <div className="flex justify-end">
+                    <button
+                        type="button"
+                        onClick={handleForgotPasswordClick}
+                        className="text-indigo-500 hover:text-indigo-600 text-sm"
+                    >
+                      Forgot Password?
+                    </button>
+                  </div>
+              )}
               <button
                   type="submit"
                   className="block w-full bg-indigo-600 mt-5 py-2 rounded-2xl hover:bg-indigo-700 hover:-translate-y-1 transition-all duration-500 text-white font-semibold mb-2"
@@ -188,12 +205,12 @@ export default function Component({ onLoginSuccess }) {
               </button>
 
               <div className="text-center mt-4">
-                <p className="text-sm">
-                  {action === 'Sign Up' ? 'Already have an account?' : "Don't have an account?"}
+                <p className="text-gray-600">
+                  {action === 'Sign Up' ? 'Already have an account?' : "Don't have an account?"}{' '}
                   <button
-                      onClick={() => setAction(action === 'Sign Up' ? 'Login' : 'Sign Up')}
                       type="button"
-                      className="font-medium text-indigo-500 hover:text-indigo-600"
+                      onClick={() => setAction(action === 'Sign Up' ? 'Login' : 'Sign Up')}
+                      className="text-indigo-500 hover:text-indigo-600 font-semibold"
                   >
                     {action === 'Sign Up' ? 'Login' : 'Sign Up'}
                   </button>

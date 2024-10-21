@@ -3,5 +3,7 @@ export const AUTH_TOKEN = "AUTH_TOKEN";
 
 export const ENDPOINTS = {
     REGISTER: "/api/check/register",
-    LOGIN: "/api/check/login"
+    LOGIN: "/api/check/login",
+    VERIFY_OTP: "/api/check/verifyOtp"
+
 }
