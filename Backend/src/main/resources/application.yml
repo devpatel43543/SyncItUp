@@ -3,19 +3,6 @@ spring:
     active: local
   application:
       name: FundFusion
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: devpatel43543@gmail.com
-    password: dfjragryfjtqnkwp
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-            required: true
-
   jpa:
     defer-datasource-initialization: true
     show-sql: true
