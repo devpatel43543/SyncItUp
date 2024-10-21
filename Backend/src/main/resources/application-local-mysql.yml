@@ -1,0 +1,42 @@
+spring:
+  application:
+    name: fundfusion
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/fundfusion
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: devpatel43543@gmail.com
+    password: dfjragryfjtqnkwp
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          ssl:
+            protocols: TLSv1.2
+
+logging:
+  level:
+    org:
+      springframework: DEBUG
+
+# Instructions for testing in a local environment:
+# 1. Create a database named 'fundfusion' in your MySQL server.
+# 2. Update the username and password fields with your MySQL credentials.
+# 3. After successful testing, replace with the VM database credentials for deployment.

@@ -46,6 +46,13 @@ public class GroupServiceImpl implements GroupService{
         groupRepository
                 .save(group);
 
+        UserGroup groupCreator = UserGroup.builder()
+                .user(creator)
+                .group(group)
+                .userEmail(creator.getEmail())
+                .build();
+        userGroupRepository.save(groupCreator);
+
         for (String email : groupRequest.getMemberEmail()) {
             User user = userRepository.findByEmail(email).orElse(null);
 

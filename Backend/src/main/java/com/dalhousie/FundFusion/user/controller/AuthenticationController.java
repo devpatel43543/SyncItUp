@@ -98,7 +98,7 @@ public class AuthenticationController {
     @PostMapping("/forgotPassword")
     public ResponseEntity<CustomResponseBody<String>> forgotPassword(HttpServletRequest servletRequest, @Valid @RequestBody ForgotPasswordRequest forgotPasswordRequest) {
         try {
-            String resetUrl = userService.getURL(servletRequest) + "/password_reset";
+            String resetUrl = userService.getURL(servletRequest) + "/passwordReset";
             log.info(resetUrl);
             userService.forgotPassword(forgotPasswordRequest.getEmail(), resetUrl);
             CustomResponseBody<String> responseBody = new CustomResponseBody<>(CustomResponseBody.Result.SUCCESS, "Reset link sent successfully", "Reset link sent");
