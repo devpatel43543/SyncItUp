@@ -4,6 +4,7 @@ import SignUp from './pages/Signup.jsx';
 import VerifyOtp from './pages/Otp-verification.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import ForgotPassword from './pages/Forget-password.jsx';
+import ResetPassword from './pages/Reset-password.jsx';
 import { AUTH_TOKEN } from './utils/Constants.js';
 
 function App() {
@@ -36,6 +37,7 @@ function App() {
                     }
                 />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/password_reset" element={<ResetPassword />} />
             </Routes>
         </Router>
     );
