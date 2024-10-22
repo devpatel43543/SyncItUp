@@ -27,8 +27,10 @@ export default function VerifyOTP({ onOtpVerificationSuccess }) {
             });
             const result = await response.json();
             if (response.ok) {
-                alert('OTP Verified! Your account is now active.');
-                onOtpVerificationSuccess();
+        
+                localStorage.setItem('AUTH_TOKEN', result.data.token);
+                console.log('OTP Verified successfully');
+                onOtpVerificationSuccess(result.data.token); 
                 navigate('/Dashboard');
             } else {
                 setError(result.message || 'Invalid OTP');

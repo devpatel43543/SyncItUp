@@ -20,7 +20,8 @@ function App() {
         setIsAuthenticated(false);
     };
 
-    const handleOtpVerificationSuccess = () => {
+    const handleOtpVerificationSuccess = (token) => {
+        //localStorage.setItem(AUTH_TOKEN, token);
         setIsAuthenticated(true);  
     };
 
