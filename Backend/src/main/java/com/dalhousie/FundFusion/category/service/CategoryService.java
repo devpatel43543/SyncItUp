@@ -14,4 +14,7 @@ public interface CategoryService {
     List<CategoryResponse> getAllCategories(CategoryRequest request);
 
     CategoryResponse addCategory(CategoryRequest request);
+
+    CategoryResponse deleteCategory(CategoryRequest request);
+
 }
