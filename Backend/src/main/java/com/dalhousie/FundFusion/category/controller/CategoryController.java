@@ -21,11 +21,11 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @GetMapping("/getAllCategories")
-    public  ResponseEntity<CustomResponseBody<List<CategoryResponse>>> getAllCategoryForUser(@RequestBody CategoryRequest request){
+    public  ResponseEntity<CustomResponseBody<List<CategoryResponse>>> getAllCategoryForUser(){
         try{
             CustomResponseBody<List<CategoryResponse>> responseBody = new CustomResponseBody<>(
                     CustomResponseBody.Result.SUCCESS,
-                    categoryService.getAllCategories(request),
+                    categoryService.getAllCategories(),
                     "All categories fetched successfully"
             );
             return ResponseEntity.status(HttpStatus.OK).body(responseBody);

@@ -29,13 +29,14 @@ public class UserTransactionServiceImpl implements  UserTransactionService{
     @Override
     public UserTransactionResponse logTransaction(UserTransactionRequest request){
 
+        User activeUer = userService.getCurrentUser();
+
         UserTransaction transaction = UserTransaction.builder()
-                            .user(userService.getUser(request.getUserId()))
+                            .user(activeUer)
                             .expense(request.getExpense())
                             .category(
                                 categoryService.getCategory(
                                     CategoryRequest.builder()
-                                            .userId(request.getUserId())
                                             .categoryId(request.getCategoryId())
                                             .build()
                                     )
@@ -76,7 +77,6 @@ public class UserTransactionServiceImpl implements  UserTransactionService{
             existingTransaction.setCategory(
                     categoryService.getCategory(
                         CategoryRequest.builder()
-                                .userId(request.getUserId())
                                 .categoryId(request.getCategoryId())
                                 .build()
                     )
@@ -94,9 +94,9 @@ public class UserTransactionServiceImpl implements  UserTransactionService{
     }
 
     @Override
-    public List<UserTransactionResponse> getAllTransactions(UserTransactionRequest requests) {
+    public List<UserTransactionResponse> getAllTransactions() {
 
-        User user = userService.getUser(requests.getUserId());
+        User user = userService.getCurrentUser();
         List<UserTransaction> userTransactions = userTransactionRepository.findByUser(user);
 
         return userTransactions.stream().map(
@@ -122,7 +122,7 @@ public class UserTransactionServiceImpl implements  UserTransactionService{
         catch (Exception e){
             e.printStackTrace();
         }
-        User user = userService.getUser(dateRange.getUserId());
+        User user = userService.getCurrentUser();
         List<UserTransaction> userTransactions = userTransactionRepository.findByUserAndTxnDateBetween(user,fromDate,toDate);
 
         return userTransactions.stream()
@@ -139,10 +139,9 @@ public class UserTransactionServiceImpl implements  UserTransactionService{
     @Override
     public List<UserTransactionResponse> getTransactionsWithCategory(UserTransactionRequest request) {
 
-        User user = userService.getUser(request.getUserId());
+        User user = userService.getCurrentUser();
         Category category = categoryService.getCategory(
                 CategoryRequest.builder()
-                        .userId(request.getUserId())
                         .categoryId(request.getCategoryId())
                         .build()
         );
@@ -164,7 +163,7 @@ public class UserTransactionServiceImpl implements  UserTransactionService{
     public void deleteTransaction(UserTransactionRequest request) {
         userTransactionRepository.findById(request.getTxnId())
                         .orElseThrow(
-                                () -> new UserTransactionNotFoundException("INVALID_TRANSACTION ID: "+ request.getUserId())
+                                () -> new UserTransactionNotFoundException("INVALID_TRANSACTION ID: "+ request.getTxnId())
                         );
         userTransactionRepository.deleteById(request.getTxnId());
     }

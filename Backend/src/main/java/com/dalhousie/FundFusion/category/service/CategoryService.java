@@ -11,7 +11,7 @@ public interface CategoryService {
 
     Category getCategory(CategoryRequest request);
 
-    List<CategoryResponse> getAllCategories(CategoryRequest request);
+    List<CategoryResponse> getAllCategories();
 
     CategoryResponse addCategory(CategoryRequest request);
 

@@ -24,7 +24,7 @@ public class CategoryServiceImpl implements CategoryService{
     @Override
     public Category getCategory(CategoryRequest request) {
 
-        User activeUser = userService.getUser(request.getUserId());
+        User activeUser = userService.getCurrentUser();
         return categoryRepository.findByIsDefault(true)
                 .get()
                 .stream()
@@ -39,18 +39,18 @@ public class CategoryServiceImpl implements CategoryService{
     }
 
     @Override
-    public List<CategoryResponse> getAllCategories(CategoryRequest request) {
+    public List<CategoryResponse> getAllCategories() {
 
         //Get All default categories
         List<Category> defaultCategories = categoryRepository.findByIsDefault(true)
                 .orElseThrow(
-                        ()-> new CategoryNotFoundException("Category not found: "+ request.getCategoryId())
+                        ()-> new CategoryNotFoundException("Default Categories not found: ")
                 );
         //Get user specific categories
-        User user = userService.getUser(request.getUserId());
+        User user = userService.getCurrentUser();
         List<Category> userDefinedCategories = categoryRepository.findByUser(user)
                 .orElseThrow(
-                        ()-> new CategoryNotFoundException("Category not found: "+ request.getCategoryId())
+                        ()-> new CategoryNotFoundException("Category not found: ")
                 );;
 
         //Combining all categories
@@ -70,7 +70,7 @@ public class CategoryServiceImpl implements CategoryService{
     @Override
     public CategoryResponse addCategory(CategoryRequest request) {
 
-        User activeUser = userService.getUser(request.getUserId());
+        User activeUser = userService.getCurrentUser();
 
         Category categoryToBeAdded = Category.builder()
                         .categoryName(request.getCategory())
@@ -91,9 +91,7 @@ public class CategoryServiceImpl implements CategoryService{
 
         Category category = categoryRepository.findByCategoryIdAndUser(
                 request.getCategoryId(),
-                userService.getUser(
-                        request.getUserId()
-                )
+                userService.getCurrentUser()
             )
                 .orElseThrow(
                         ()-> new CategoryNotFoundException("Category not found: "+ request.getCategoryId())
