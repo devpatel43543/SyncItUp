@@ -1,6 +1,7 @@
 package com.dalhousie.FundFusion.user.service;
 
 import com.dalhousie.FundFusion.category.entity.Category;
+import com.dalhousie.FundFusion.category.requestEntity.CategoryRequest;
 import com.dalhousie.FundFusion.category.service.CategoryService;
 import com.dalhousie.FundFusion.dto.DateRangeEntity;
 import com.dalhousie.FundFusion.exception.UserTransactionNotFoundException;
@@ -28,10 +29,18 @@ public class UserTransactionServiceImpl implements  UserTransactionService{
     @Override
     public UserTransactionResponse logTransaction(UserTransactionRequest request){
 
+        User activeUer = userService.getCurrentUser();
+
         UserTransaction transaction = UserTransaction.builder()
-                            .user(userService.getUser(request.getUserId()))
+                            .user(activeUer)
                             .expense(request.getExpense())
-                            .category(categoryService.getCategory(request.getCategoryId()))
+                            .category(
+                                categoryService.getCategory(
+                                    CategoryRequest.builder()
+                                            .categoryId(request.getCategoryId())
+                                            .build()
+                                    )
+                            )
                             .txnDesc(request.getTxnDesc())
                             .txnDate(request.getTxnDate())
                         .build();
@@ -65,7 +74,13 @@ public class UserTransactionServiceImpl implements  UserTransactionService{
         if(request.getTxnDate() != null)
             existingTransaction.setTxnDate(request.getTxnDate());
         if(request.getCategoryId() != null)
-            existingTransaction.setCategory(categoryService.getCategory(request.getCategoryId()));
+            existingTransaction.setCategory(
+                    categoryService.getCategory(
+                        CategoryRequest.builder()
+                                .categoryId(request.getCategoryId())
+                                .build()
+                    )
+            );
 
         UserTransaction savedTransaction = userTransactionRepository.save(existingTransaction);
 
@@ -79,9 +94,9 @@ public class UserTransactionServiceImpl implements  UserTransactionService{
     }
 
     @Override
-    public List<UserTransactionResponse> getAllTransactions(UserTransactionRequest requests) {
+    public List<UserTransactionResponse> getAllTransactions() {
 
-        User user = userService.getUser(requests.getUserId());
+        User user = userService.getCurrentUser();
         List<UserTransaction> userTransactions = userTransactionRepository.findByUser(user);
 
         return userTransactions.stream().map(
@@ -107,7 +122,7 @@ public class UserTransactionServiceImpl implements  UserTransactionService{
         catch (Exception e){
             e.printStackTrace();
         }
-        User user = userService.getUser(dateRange.getUserId());
+        User user = userService.getCurrentUser();
         List<UserTransaction> userTransactions = userTransactionRepository.findByUserAndTxnDateBetween(user,fromDate,toDate);
 
         return userTransactions.stream()
@@ -124,8 +139,12 @@ public class UserTransactionServiceImpl implements  UserTransactionService{
     @Override
     public List<UserTransactionResponse> getTransactionsWithCategory(UserTransactionRequest request) {
 
-        User user = userService.getUser(request.getUserId());
-        Category category = categoryService.getCategory(request.getCategoryId());
+        User user = userService.getCurrentUser();
+        Category category = categoryService.getCategory(
+                CategoryRequest.builder()
+                        .categoryId(request.getCategoryId())
+                        .build()
+        );
         List<UserTransaction> userTransactions = userTransactionRepository.findByUserAndCategory(user,category);
 
         return userTransactions.stream()
@@ -144,7 +163,7 @@ public class UserTransactionServiceImpl implements  UserTransactionService{
     public void deleteTransaction(UserTransactionRequest request) {
         userTransactionRepository.findById(request.getTxnId())
                         .orElseThrow(
-                                () -> new UserTransactionNotFoundException("INVALID_TRANSACTION ID: "+ request.getUserId())
+                                () -> new UserTransactionNotFoundException("INVALID_TRANSACTION ID: "+ request.getTxnId())
                         );
         userTransactionRepository.deleteById(request.getTxnId());
     }

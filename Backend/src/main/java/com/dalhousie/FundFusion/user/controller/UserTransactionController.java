@@ -1,13 +1,10 @@
 package com.dalhousie.FundFusion.user.controller;
 
-import com.dalhousie.FundFusion.category.entity.Category;
 import com.dalhousie.FundFusion.dto.DateRangeEntity;
-import com.dalhousie.FundFusion.user.entity.UserTransaction;
 import com.dalhousie.FundFusion.user.requestEntity.UserTransactionRequest;
 import com.dalhousie.FundFusion.user.responseEntity.UserTransactionResponse;
 import com.dalhousie.FundFusion.user.service.UserTransactionService;
 import com.dalhousie.FundFusion.util.CustomResponseBody;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -26,7 +23,7 @@ public class UserTransactionController {
     private final UserTransactionService userTransactionService;
 
     @PostMapping("/logTransaction")
-    public ResponseEntity<CustomResponseBody<UserTransactionResponse>> logTransaction(@RequestBody @Valid UserTransactionRequest userTransactionRequest){
+    public ResponseEntity<CustomResponseBody<UserTransactionResponse>> logTransaction(@RequestBody UserTransactionRequest userTransactionRequest){
         try{
             CustomResponseBody<UserTransactionResponse> responseBody = new CustomResponseBody<>(
                     CustomResponseBody.Result.SUCCESS,
@@ -66,11 +63,11 @@ public class UserTransactionController {
     }
 
     @GetMapping("/getAllTransactions")
-    public ResponseEntity<CustomResponseBody<List<UserTransactionResponse>>> getAllTransactions(@RequestBody UserTransactionRequest userTransactionRequest){
+    public ResponseEntity<CustomResponseBody<List<UserTransactionResponse>>> getAllTransactions(){
         try{
             CustomResponseBody<List<UserTransactionResponse>> responseBody = new CustomResponseBody<>(
                     CustomResponseBody.Result.SUCCESS,
-                    userTransactionService.getAllTransactions(userTransactionRequest),
+                    userTransactionService.getAllTransactions(),
                     "All transactions fetched successfully"
             );
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(responseBody);
