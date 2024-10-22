@@ -1,6 +1,7 @@
 package com.dalhousie.FundFusion.user.service;
 
 import com.dalhousie.FundFusion.category.entity.Category;
+import com.dalhousie.FundFusion.category.requestEntity.CategoryRequest;
 import com.dalhousie.FundFusion.category.service.CategoryService;
 import com.dalhousie.FundFusion.dto.DateRangeEntity;
 import com.dalhousie.FundFusion.exception.UserTransactionNotFoundException;
@@ -31,7 +32,14 @@ public class UserTransactionServiceImpl implements  UserTransactionService{
         UserTransaction transaction = UserTransaction.builder()
                             .user(userService.getUser(request.getUserId()))
                             .expense(request.getExpense())
-                            .category(categoryService.getCategory(request.getCategoryId()))
+                            .category(
+                                categoryService.getCategory(
+                                    CategoryRequest.builder()
+                                            .userId(request.getUserId())
+                                            .categoryId(request.getCategoryId())
+                                            .build()
+                                    )
+                            )
                             .txnDesc(request.getTxnDesc())
                             .txnDate(request.getTxnDate())
                         .build();
@@ -65,7 +73,14 @@ public class UserTransactionServiceImpl implements  UserTransactionService{
         if(request.getTxnDate() != null)
             existingTransaction.setTxnDate(request.getTxnDate());
         if(request.getCategoryId() != null)
-            existingTransaction.setCategory(categoryService.getCategory(request.getCategoryId()));
+            existingTransaction.setCategory(
+                    categoryService.getCategory(
+                        CategoryRequest.builder()
+                                .userId(request.getUserId())
+                                .categoryId(request.getCategoryId())
+                                .build()
+                    )
+            );
 
         UserTransaction savedTransaction = userTransactionRepository.save(existingTransaction);
 
@@ -125,7 +140,12 @@ public class UserTransactionServiceImpl implements  UserTransactionService{
     public List<UserTransactionResponse> getTransactionsWithCategory(UserTransactionRequest request) {
 
         User user = userService.getUser(request.getUserId());
-        Category category = categoryService.getCategory(request.getCategoryId());
+        Category category = categoryService.getCategory(
+                CategoryRequest.builder()
+                        .userId(request.getUserId())
+                        .categoryId(request.getCategoryId())
+                        .build()
+        );
         List<UserTransaction> userTransactions = userTransactionRepository.findByUserAndCategory(user,category);
 
         return userTransactions.stream()
