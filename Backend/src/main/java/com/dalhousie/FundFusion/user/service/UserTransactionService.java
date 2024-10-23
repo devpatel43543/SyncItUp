@@ -18,6 +18,6 @@ public interface UserTransactionService {
 
     List<UserTransactionResponse> getTransactionsWithCategory(UserTransactionRequest request);
 
-    void deleteTransaction(UserTransactionRequest request);
+    void deleteTransaction(Integer id);
 
 }

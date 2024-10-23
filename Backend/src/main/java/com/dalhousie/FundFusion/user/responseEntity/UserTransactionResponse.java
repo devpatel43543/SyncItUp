@@ -17,6 +17,6 @@ public class UserTransactionResponse {
     private String txnDesc;
     private Float expense;
     private LocalDate txnDate;
-    private Integer categoryId;
+    private String category;
 
 }

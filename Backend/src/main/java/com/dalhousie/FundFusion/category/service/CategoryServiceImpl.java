@@ -87,22 +87,16 @@ public class CategoryServiceImpl implements CategoryService{
     }
 
     @Override
-    public CategoryResponse deleteCategory(CategoryRequest request) {
+    public void deleteCategory(Integer id) {
 
         Category category = categoryRepository.findByCategoryIdAndUser(
-                request.getCategoryId(),
+                id,
                 userService.getCurrentUser()
             )
                 .orElseThrow(
-                        ()-> new CategoryNotFoundException("Category not found: "+ request.getCategoryId())
-                );;
-
+                        ()-> new CategoryNotFoundException("Category not found: "+ id)
+                );
         categoryRepository.delete(category);
-
-        return CategoryResponse.builder()
-                .categoryId(category.getCategoryId())
-                .category(category.getCategoryName())
-                .build();
     }
 
 }

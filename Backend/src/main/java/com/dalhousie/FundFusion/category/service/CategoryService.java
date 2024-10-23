@@ -15,6 +15,6 @@ public interface CategoryService {
 
     CategoryResponse addCategory(CategoryRequest request);
 
-    CategoryResponse deleteCategory(CategoryRequest request);
+    void deleteCategory(Integer id);
 
 }
