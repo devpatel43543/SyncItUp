@@ -28,7 +28,7 @@ public class CategoryController {
                     categoryService.getAllCategories(),
                     "All categories fetched successfully"
             );
-            return ResponseEntity.status(HttpStatus.OK).body(responseBody);
+            return ResponseEntity.status(HttpStatus.CREATED).body(responseBody);
         }
         catch (Exception e){
             log.error("Unexpected error during transaction: {}",e.getMessage());
@@ -46,9 +46,9 @@ public class CategoryController {
             CustomResponseBody<CategoryResponse> responseBody = new CustomResponseBody<>(
                     CustomResponseBody.Result.SUCCESS,
                     categoryService.addCategory(request),
-                    "All categories fetched successfully"
+                    "Category added successfully"
             );
-            return ResponseEntity.status(HttpStatus.OK).body(responseBody);
+            return ResponseEntity.status(HttpStatus.CREATED).body(responseBody);
         }
         catch (Exception e){
             log.error("Unexpected error during transaction: {}",e.getMessage());
@@ -60,15 +60,16 @@ public class CategoryController {
         }
     }
 
-    @PostMapping("/deleteCategory")
-    public ResponseEntity<CustomResponseBody<CategoryResponse>> deleteCategory(@RequestBody CategoryRequest request){
+    @DeleteMapping("/deleteCategory")
+    public ResponseEntity<CustomResponseBody<CategoryResponse>> deleteCategory(@RequestParam("id") Integer id){
         try{
+            categoryService.deleteCategory(id);
             CustomResponseBody<CategoryResponse> responseBody = new CustomResponseBody<>(
                     CustomResponseBody.Result.SUCCESS,
-                    categoryService.deleteCategory(request),
-                    "All categories fetched successfully"
+                    null,
+                    "Category deleted successfully"
             );
-            return ResponseEntity.status(HttpStatus.OK).body(responseBody);
+            return ResponseEntity.status(HttpStatus.CREATED).body(responseBody);
         }
         catch (Exception e){
             log.error("Unexpected error during transaction: {}",e.getMessage());

@@ -42,7 +42,7 @@ public class UserTransactionController {
         }
     }
 
-    @PostMapping("/updateTransaction")
+    @PutMapping("/updateTransaction")
     public ResponseEntity<CustomResponseBody<UserTransactionResponse>> updateTransaction(@RequestBody UserTransactionRequest userTransactionRequest){
         try{
             CustomResponseBody<UserTransactionResponse> responseBody = new CustomResponseBody<>(
@@ -50,7 +50,7 @@ public class UserTransactionController {
                     userTransactionService.updateTransaction(userTransactionRequest),
                     "Transaction updated successfully"
             );
-            return ResponseEntity.status(HttpStatus.ACCEPTED).body(responseBody);
+            return ResponseEntity.status(HttpStatus.CREATED).body(responseBody);
         }
         catch (Exception e){
             log.error("Unexpected error during transaction: {}",e.getMessage());
@@ -70,7 +70,7 @@ public class UserTransactionController {
                     userTransactionService.getAllTransactions(),
                     "All transactions fetched successfully"
             );
-            return ResponseEntity.status(HttpStatus.ACCEPTED).body(responseBody);
+            return ResponseEntity.status(HttpStatus.CREATED).body(responseBody);
         }
         catch (Exception e){
             log.error("Unexpected error during transaction: {}",e.getMessage());
@@ -82,16 +82,16 @@ public class UserTransactionController {
         }
     }
 
-    @PostMapping("/deleteTransaction")
-    public ResponseEntity<CustomResponseBody<UserTransactionResponse>> deleteTransaction(@RequestBody UserTransactionRequest request){
+    @DeleteMapping("/deleteTransaction")
+    public ResponseEntity<CustomResponseBody<UserTransactionResponse>> deleteTransaction(@RequestParam("id") Integer id){
         try{
-            userTransactionService.deleteTransaction(request);
+            userTransactionService.deleteTransaction(id);
             CustomResponseBody<UserTransactionResponse> responseBody = new CustomResponseBody<>(
                     CustomResponseBody.Result.SUCCESS,
                     null,
                     "Transaction deleted successfully"
             );
-            return ResponseEntity.status(HttpStatus.OK).body(responseBody);
+            return ResponseEntity.status(HttpStatus.CREATED).body(responseBody);
         }
         catch (NoSuchElementException e){
             log.error("Unexpected error during transaction: {}",e.getMessage());
