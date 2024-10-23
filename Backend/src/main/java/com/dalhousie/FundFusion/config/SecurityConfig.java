@@ -13,8 +13,6 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.stream.IntStream;
-
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -27,29 +25,23 @@ public class SecurityConfig {
     @Bean
     @Profile("!local")
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf(AbstractHttpConfigurer::disable)
+        http.csrf(AbstractHttpConfigurer::disable) // Disable CSRF for stateless APIs
                 .authorizeHttpRequests(req -> req
-                        .requestMatchers("/api/check/**").permitAll() // Allow access to register endpoint
+                        .requestMatchers("/api/check/**").permitAll() // Allow access to check endpoint
                         .anyRequest().authenticated() // All other requests require authentication
                 )
-                .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-                .authenticationProvider(authenticationProvider);
+                .sessionManagement(session -> session.sessionCreationPolicy(STATELESS)) // Stateless session
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class) // Add JWT filter
+                .authenticationProvider(authenticationProvider); // Set authentication provider
 
         return http.build();
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChainLocal(HttpSecurity http) throws Exception{
+    public SecurityFilterChain securityFilterChainLocal(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
-                .headers(header ->
-                        header.frameOptions(
-                                frameOption -> frameOption.sameOrigin()
-                        )
-                )
-                .authorizeHttpRequests(
-                        request -> request.anyRequest().permitAll()
-                );
+                .headers(header -> header.frameOptions(frameOption -> frameOption.sameOrigin()))
+                .authorizeHttpRequests(request -> request.anyRequest().permitAll());
 
         return http.build();
     }
