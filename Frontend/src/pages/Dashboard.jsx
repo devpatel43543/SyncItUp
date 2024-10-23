@@ -1,43 +1,21 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { PlusIcon, HomeIcon, ChartPieIcon, UsersIcon, Cog6ToothIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
-import { Menu } from '@headlessui/react';
-import { AUTH_TOKEN, ENDPOINTS, BASE_URL } from '../utils/Constants';
-import axios from 'axios';
-
+import { ENDPOINTS } from '../utils/Constants';
+import ApiCallingContext from '../context/ApiCallingContext';
 export default function Dashboard() {
+    const { getRequest, postRequest, putRequest, deleteRequest } = useContext(ApiCallingContext);
     const [expenses, setExpenses] = useState([]);
+    const [categories, setCategories] = useState([]); 
     const [showModal, setShowModal] = useState(false);
     const [editingExpense, setEditingExpense] = useState(null);
     const [newExpense, setNewExpense] = useState({
         date: "",
         amount: "",
-        category: "",
+        category: "", 
         description: "",
     });
 
-    const axiosConfig = {
-        baseURL: BASE_URL,
-        headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-        },
-    };
 
-    const axiosInstance = axios.create(axiosConfig);
-    const axiosInstanceWithAuth = axios.create(axiosConfig);
-
-    axiosInstanceWithAuth.interceptors.request.use(
-        (config) => {
-            const token = localStorage.getItem(AUTH_TOKEN);
-            if (token) {
-                config.headers.Authorization = `Bearer ${token}`;
-            }
-            return config;
-        },
-        (error) => {
-            return Promise.reject(error);
-        }
-    );
 
     const getAllExpense = async () => {
         try {
@@ -49,47 +27,18 @@ export default function Dashboard() {
             console.error("Error fetching expenses: ", error);
         }
     };
-    const getRequest = async (endpoint, useAuthToken = false) => {
-        console.log("getRequest is called")
+
+    const getAllCategories = async () => {
         try {
-          const instance = useAuthToken ? axiosInstanceWithAuth : axiosInstance;
-          return await instance.get(endpoint);
+            const response = await getRequest(ENDPOINTS.ALL_CATEGORY, true);
+            if (response.data.result === "SUCCESS" && Array.isArray(response.data.data)) {
+                setCategories(response.data.data); // Set the fetched categories
+            }
         } catch (error) {
-          console.error(`Error in GET request to ${endpoint}:`, error);
-          throw error;
-        }
-      };
-    const postRequest = async (endpoint, useAuthToken = false, data) => {
-        try {
-            const instance = useAuthToken ? axiosInstanceWithAuth : axiosInstance;
-            return await instance.post(endpoint, data);
-        } catch (error) {
-            console.error(`Error in POST request to ${endpoint}:`, error);
-            throw error;
+            console.log(error);
         }
     };
 
-    const updateRequest = async (endpoint, useAuthToken = false, data) => {
-        try {
-            const instance = useAuthToken ? axiosInstanceWithAuth : axiosInstance;
-            return await instance.put(endpoint, data);
-        } catch (error) {
-            console.error(`Error in PUT request to ${endpoint}:`, error);
-            throw error;
-        }
-    };
-    const deleteRequest = async (endpoint, useAuthToken = false, params = {}) => {
-        try {
-            const instance = useAuthToken ? axiosInstanceWithAuth : axiosInstance;
-            
-            // Pass the params to the delete request
-            return await instance.delete(endpoint, { params });
-        } catch (error) {
-            console.error(`Error in DELETE request to ${endpoint}:`, error);
-            throw error;
-        }
-    };
-    
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -100,26 +49,26 @@ export default function Dashboard() {
         e.preventDefault();
         const expenseData = {
             txnDate: newExpense.date,
-            expense: parseFloat(newExpense.amount), // Ensure this is a number
-            categoryId: parseInt(newExpense.category), // Convert to integer
+            expense: parseFloat(newExpense.amount),
+            categoryId: parseInt(newExpense.category), // Make sure category is an integer
             txnDesc: newExpense.description,
         };
 
         if (editingExpense) {
-            // Update existing expense
             try {
-                await updateRequest(ENDPOINTS.UPDATE_EXPENSE, true, { ...expenseData, txnId: editingExpense.txnId });
+                await putRequest(ENDPOINTS.UPDATE_EXPENSE, true, { ...expenseData, txnId: editingExpense.txnId });
                 setExpenses(expenses.map(expense => (expense.txnId === editingExpense.txnId ? { ...expenseData, txnId: expense.txnId } : expense)));
                 setEditingExpense(null);
             } catch (error) {
                 console.error("Error updating expense:", error);
             }
         } else {
-            // Add new expense
             try {
                 const response = await postRequest(ENDPOINTS.CREATE_PERSONAL_EXPENSE, true, expenseData);
                 if (response.data.result === "SUCCESS") {
-                    setExpenses([...expenses, { ...expenseData, txnId: response.data.data.txnId }]); // Assuming API returns txnId
+                    setExpenses([...expenses, { ...expenseData, txnId: response.data.data.txnId }]);
+                    // Fetch categories after adding expense
+                    getAllCategories();
                 }
             } catch (error) {
                 console.error("Error adding expense:", error);
@@ -134,34 +83,25 @@ export default function Dashboard() {
         setNewExpense({
             date: expense.txnDate,
             amount: expense.expense.toString(),
-            category: expense.categoryId.toString(),
+            category: expense.categoryId?.toString() || "",
             description: expense.txnDesc,
         });
         setShowModal(true);
     };
 
-    // const handleDelete = async (txnId) => {
-    //     try {
-    //         await axiosInstanceWithAuth.delete(`${ENDPOINTS.DELETE_EXPENSE}/${txnId}`); // Assuming this is the correct delete endpoint
-    //         setExpenses(expenses.filter(expense => expense.txnId !== txnId));
-    //     } catch (error) {
-    //         console.error("Error deleting expense:", error);
-    //     }
-    // };
-
     const handleDelete = async (txnId) => {
         try {
-            // Call the deleteRequest function, passing the DELETE_EXPENSE endpoint with the txnId as a parameter
-            await deleteRequest(ENDPOINTS.DELETE_EXPENSE, true, { txnId });
-            
-            // Update the state to remove the deleted expense from the UI
+            await deleteRequest(ENDPOINTS.DELETE_EXPENSE, true, { id: txnId });
             setExpenses(expenses.filter(expense => expense.txnId !== txnId));
         } catch (error) {
             console.error("Error deleting expense:", error);
         }
-    };  
+    };
+
+
     useEffect(() => {
         getAllExpense();
+        getAllCategories();
     }, []);
 
     return (
@@ -192,16 +132,7 @@ export default function Dashboard() {
                                 </a>
                             </div>
                         </div>
-                        {/* <div className="flex items-center">
-                            <Menu as="div" className="relative ml-3">
-                                <div>
-                                    <Menu.Button className="flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                        <span className="sr-only">Open user menu</span>
-                                        <span className="text-gray-800 font-medium">user@example.com</span>
-                                    </Menu.Button>
-                                </div>
-                            </Menu>
-                        </div> */}
+
                     </div>
                 </div>
             </nav>
@@ -214,7 +145,7 @@ export default function Dashboard() {
                                 <div className="flex items-center justify-between">
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center justify-between mb-1">
-                                            <h3 className="text-lg font-semibold text-gray-900 truncate">{expense.categoryId}</h3>
+                                            <h3 className="text-lg font-semibold text-gray-900 truncate">{expense.category}</h3>
                                             <span className="text-2xl font-bold text-indigo-600">${expense.expense}</span>
                                         </div>
                                         <p className="text-sm text-gray-500 truncate">{expense.txnDesc}</p>
@@ -270,15 +201,21 @@ export default function Dashboard() {
                             </div>
                             <div className="mb-4">
                                 <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="category">Category</label>
-                                <input
-                                    type="text"
+                                <select
                                     id="category"
                                     name="category"
                                     value={newExpense.category}
                                     onChange={handleInputChange}
                                     required
                                     className="mt-1 block w-full border border-gray-300 rounded-lg p-2"
-                                />
+                                >
+                                    <option value="">Select a category</option>
+                                    {categories.map((category) => (
+                                        <option key={category.categoryId} value={category.categoryId}>
+                                            {category.category}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
                             <div className="mb-4">
                                 <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="description">Description</label>
@@ -293,7 +230,7 @@ export default function Dashboard() {
                             </div>
                             <div className="flex justify-end">
                                 <button type="button" onClick={() => setShowModal(false)} className="mr-2 bg-gray-300 text-gray-800 rounded-lg px-4 py-2 hover:bg-gray-400">Cancel</button>
-                                <button type="submit" className="bg-indigo-600 text-white rounded-lg px-4 py-2 hover:bg-indigo-700">{editingExpense ? 'Update' : 'Add'} Expense</button>
+                                <button type="submit" className="bg-indigo-600 text-white rounded-lg px-4 py-2 hover:bg-indigo-700">{editingExpense ? 'Update' : 'Add'}</button>
                             </div>
                         </form>
                     </div>

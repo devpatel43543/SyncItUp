@@ -10,5 +10,6 @@ export const ENDPOINTS = {
     CREATE_PERSONAL_EXPENSE:"/user/transaction/logTransaction",//for adding expense
     ALL_PERSONAL_EXPENSE:"/user/transaction/getAllTransactions",// for getting all expenses
     UPDATE_EXPENSE:"/user/transaction/updateTransaction", //for update expense
-    DELETE_EXPENSE:"/user/transaction/deleteTransaction"
+    DELETE_EXPENSE:"/user/transaction/deleteTransaction",
+    ALL_CATEGORY:"/category/getAllCategories"
 }

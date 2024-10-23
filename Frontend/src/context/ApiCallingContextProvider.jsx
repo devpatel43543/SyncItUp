@@ -1,15 +1,11 @@
 import React, { useContext, useEffect } from "react";
-import AxiosContext from "./AxiosContext";
+import ApiCallingContext from "./ApiCallingContext";
 import { AUTH_TOKEN,BASE_URL } from "../utils/Constants";
 import axios from "axios";
 import { data } from "autoprefixer";
 //import AuthContext from "./AuthContext";
-const AxiosContextProvider = (props) => {
-  let token="";
-  //const { authToken } = useContext(AuthContext);
-  useEffect(()=>{
-    token=localStorage.getItem(AUTH_TOKEN)
-  },[])
+const ApiCallingContextProvider = (props) => {
+
   const axiosConfig = {
     baseURL: BASE_URL,
     headers: {
@@ -26,6 +22,7 @@ const AxiosContextProvider = (props) => {
   
   axiosInstanceWithAuth.interceptors.request.use(
     (config) => {
+      const token = localStorage.getItem(AUTH_TOKEN);
 
       if (token) {
         console.log("called");
@@ -55,7 +52,6 @@ const AxiosContextProvider = (props) => {
   const postRequest = async (endpoint, useAuthToken = false, data) => {
     try {
       const instance = useAuthToken ? axiosInstanceWithAuth : axiosInstance;
-      console.log(authToken);
 
       return await instance.post(endpoint, data);
     } catch (error) {
@@ -89,12 +85,11 @@ const AxiosContextProvider = (props) => {
     }
   };
   return (
-    <AxiosContext.Provider
+    <ApiCallingContext.Provider
       value={{ getRequest, postRequest, putRequest, deleteRequest }}
     >
       {props.children}
-    </AxiosContext.Provider>
+    </ApiCallingContext.Provider>
   );
 };
-
-export default AxiosContextProvider;
+export default ApiCallingContextProvider;
