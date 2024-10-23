@@ -54,7 +54,7 @@ public class UserTransactionServiceImpl implements  UserTransactionService{
                 .txnDesc(savedTransaction.getTxnDesc())
                 .txnDate(savedTransaction.getTxnDate())
                 .expense(savedTransaction.getExpense())
-                .categoryId(savedTransaction.getCategory().getCategoryName())
+                .category(savedTransaction.getCategory().getCategoryName())
                 .build();
 
     }
@@ -89,7 +89,7 @@ public class UserTransactionServiceImpl implements  UserTransactionService{
                 .txnDesc(savedTransaction.getTxnDesc())
                 .txnDate(savedTransaction.getTxnDate())
                 .expense(savedTransaction.getExpense())
-                .categoryId(savedTransaction.getCategory().getCategoryName())
+                .category(savedTransaction.getCategory().getCategoryName())
                 .build();
     }
 
@@ -105,7 +105,7 @@ public class UserTransactionServiceImpl implements  UserTransactionService{
                         .txnDesc(savedTransaction.getTxnDesc())
                         .txnDate(savedTransaction.getTxnDate())
                         .expense(savedTransaction.getExpense())
-                        .categoryId(savedTransaction.getCategory().getCategoryName())
+                        .category(savedTransaction.getCategory().getCategoryName())
                         .build()
         ).collect(Collectors.toList());
 
@@ -131,7 +131,7 @@ public class UserTransactionServiceImpl implements  UserTransactionService{
                         .txnDesc(userTransaction.getTxnDesc())
                         .txnDate(userTransaction.getTxnDate())
                         .expense(userTransaction.getExpense())
-                        .categoryId(userTransaction.getCategory().getCategoryName())
+                        .category(userTransaction.getCategory().getCategoryName())
                         .build()
                 ).collect(Collectors.toList());
     }
@@ -149,7 +149,7 @@ public class UserTransactionServiceImpl implements  UserTransactionService{
 
         return userTransactions.stream()
                 .map(userTransaction -> UserTransactionResponse.builder()
-                                .categoryId(userTransaction.getCategory().getCategoryName())
+                                .category(userTransaction.getCategory().getCategoryName())
                                 .txnId(userTransaction.getTxnId())
                                 .txnDesc(userTransaction.getTxnDesc())
                                 .expense(userTransaction.getExpense())
@@ -160,13 +160,12 @@ public class UserTransactionServiceImpl implements  UserTransactionService{
     }
 
     @Override
-    public void deleteTransaction(Integer txnId) {
-        // Check if the transaction exists
-        userTransactionRepository.findById(txnId)
-                .orElseThrow(() -> new UserTransactionNotFoundException("INVALID_TRANSACTION ID: " + txnId));
-
-        // Delete the transaction
-        userTransactionRepository.deleteById(txnId);
+    public void deleteTransaction(Integer id) {
+        userTransactionRepository.findById(id)
+                        .orElseThrow(
+                                () -> new UserTransactionNotFoundException("INVALID_TRANSACTION ID: "+ id)
+                        );
+        userTransactionRepository.deleteById(id);
     }
 
     public void checkDate(UserTransaction transaction){

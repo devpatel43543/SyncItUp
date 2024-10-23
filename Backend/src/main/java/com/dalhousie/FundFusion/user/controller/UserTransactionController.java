@@ -54,7 +54,7 @@ public class UserTransactionController {
                     userTransactionService.updateTransaction(userTransactionRequest),
                     "Transaction updated successfully"
             );
-            return ResponseEntity.status(HttpStatus.ACCEPTED).body(responseBody);
+            return ResponseEntity.status(HttpStatus.CREATED).body(responseBody);
         }
         catch (Exception e){
             log.error("Unexpected error during transaction: {}",e.getMessage());
@@ -74,7 +74,7 @@ public class UserTransactionController {
                     userTransactionService.getAllTransactions(),
                     "All transactions fetched successfully"
             );
-            return ResponseEntity.status(HttpStatus.ACCEPTED).body(responseBody);
+            return ResponseEntity.status(HttpStatus.CREATED).body(responseBody);
         }
         catch (Exception e){
             log.error("Unexpected error during transaction: {}",e.getMessage());
@@ -87,18 +87,18 @@ public class UserTransactionController {
     }
 
     @DeleteMapping("/deleteTransaction")
-    public ResponseEntity<CustomResponseBody<UserTransactionResponse>> deleteTransaction(
-            @RequestParam("txnId") Integer txnId) {
-        try {
-            userTransactionService.deleteTransaction(txnId);
+    public ResponseEntity<CustomResponseBody<UserTransactionResponse>> deleteTransaction(@RequestParam("id") Integer id){
+        try{
+            userTransactionService.deleteTransaction(id);
             CustomResponseBody<UserTransactionResponse> responseBody = new CustomResponseBody<>(
                     CustomResponseBody.Result.SUCCESS,
                     null,
                     "Transaction deleted successfully"
             );
-            return ResponseEntity.status(HttpStatus.OK).body(responseBody);
-        } catch (NoSuchElementException e) {
-            log.error("Unexpected error during transaction: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.CREATED).body(responseBody);
+        }
+        catch (NoSuchElementException e){
+            log.error("Unexpected error during transaction: {}",e.getMessage());
             CustomResponseBody<UserTransactionResponse> responseBody = new CustomResponseBody<>(
                     CustomResponseBody.Result.FAILURE,
                     null,
