@@ -91,8 +91,8 @@ function ForgotPassword() {
         });
       }
     } catch (error) {
-      console.error("Registration failed:", error);
-      toast.error("Registration failed", {
+      console.error("Invalid email:", error);
+      toast.error("Invalid email", {
         position: "top-right",
         autoClose: 3000,
         hideProgressBar: false,
@@ -153,7 +153,7 @@ function ForgotPassword() {
                     isSubmitting={isLoading}
                     className="rounded-md px-2 py-1"
                   >
-                    submit
+                    Submit
                   </Button>
                 </div>
               </div>
