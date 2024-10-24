@@ -66,7 +66,7 @@ function ForgotPassword() {
       );
       if (response.status == HttpStatusCode.Ok) {
         console.log("inside response if ", result.data.token);
-        toast.success("check varification link on email", {
+        toast.success("Check Verification link on email", {
           position: "top-right",
           autoClose: 3000,
           hideProgressBar: false,

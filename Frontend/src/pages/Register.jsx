@@ -213,7 +213,7 @@ function Register() {
                   </label>
                 </div>
                 <Link class="text-blue-500 text-xs underline" to={frontEndRoutes.login}>
-                    already registerd? Sign in
+                    Already registerd? Sign in
                   </Link>
                 <div class="relative">
                   {/* <button class="bg-blue-500 text-white rounded-md px-2 py-1" type="submit">

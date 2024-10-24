@@ -119,7 +119,7 @@ function Login() {
 
         } catch (error) {
             console.error("Registration failed:", error);
-            toast.error("Registration failed", {
+            toast.error("Sign In failed", {
                 position: "top-right",
                 autoClose: 3000,
                 hideProgressBar: false,
@@ -186,7 +186,7 @@ function Login() {
                     </label>
                   </div>
                   <Link class="text-blue-500 text-xs underline" to={frontEndRoutes.forgotPassword}>
-                    forgot password
+                    Forgot password
                   </Link>
                   <br>
 
