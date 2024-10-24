@@ -67,8 +67,9 @@ export default function Dashboard() {
 
         if (editingExpense) {
             try {
-                await putRequest(ENDPOINTS.UPDATE_EXPENSE, true, { ...expenseData, txnId: editingExpense.txnId });
-                setExpenses(expenses.map(expense => (expense.txnId === editingExpense.txnId ? { ...expenseData, txnId: expense.txnId } : expense)));
+                const response = await putRequest(ENDPOINTS.UPDATE_EXPENSE, true, { ...expenseData, txnId: editingExpense.txnId });
+
+                setExpenses(expenses.map(expense => (expense.txnId === editingExpense.txnId ? { ...response.data.data, txnId: expense.txnId } : expense)));
                 setEditingExpense(null);
             } catch (error) {
                 console.error("Error updating expense:", error);
