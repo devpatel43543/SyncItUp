@@ -46,7 +46,7 @@ public class AuthenticationController {
         try{
             AuthenticationResponse authenticationResponse = authenticationService.verifyOtp(otpVarificationRequest);
             CustomResponseBody<AuthenticationResponse> responseBody =new CustomResponseBody<>(CustomResponseBody.Result.SUCCESS,authenticationResponse,"verified email successfully");
-            return ResponseEntity.status(HttpStatus.OK).body(responseBody);
+            return ResponseEntity.status(HttpStatus.CREATED).body(responseBody);
         }catch (TokenExpiredException e) {
             log.error("OTP expired: {}", e.getMessage());
             CustomResponseBody<AuthenticationResponse> responseBody = new CustomResponseBody<>(CustomResponseBody.Result.FAILURE, null, e.getMessage());
@@ -93,7 +93,7 @@ public class AuthenticationController {
     @PostMapping("/forgotPassword")
     public ResponseEntity<CustomResponseBody<String>> forgotPassword(HttpServletRequest servletRequest, @Valid @RequestBody ForgotPasswordRequest forgotPasswordRequest) {
         try {
-            String resetUrl = authenticationService.getURL(servletRequest) + "/password_reset";
+            String resetUrl = authenticationService.getURL(servletRequest) + "/resetPassword";
             log.info(resetUrl);
             authenticationService.forgotPassword(forgotPasswordRequest.getEmail(), resetUrl);
             CustomResponseBody<String> responseBody = new CustomResponseBody<>(CustomResponseBody.Result.SUCCESS, "Reset link sent successfully", "Reset link sent");

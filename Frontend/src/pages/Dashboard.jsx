@@ -2,6 +2,10 @@ import React, { useContext, useEffect, useState } from 'react';
 import { PlusIcon, HomeIcon, ChartPieIcon, UsersIcon, Cog6ToothIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { ENDPOINTS } from '../utils/Constants';
 import ApiCallingContext from '../context/ApiCallingContext';
+import Navbar from '../components/Navbar';
+import { frontEndRoutes } from '../utils/FrontendRoutes';
+import AuthContext from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 export default function Dashboard() {
     const { getRequest, postRequest, putRequest, deleteRequest } = useContext(ApiCallingContext);
     const [expenses, setExpenses] = useState([]);
@@ -14,9 +18,16 @@ export default function Dashboard() {
         category: "", 
         description: "",
     });
+    const navigate = useNavigate()
+    const {loggedInUserEmail} = useContext(AuthContext)
 
-
-
+    useEffect(()=>{
+        if(loggedInUserEmail){
+            navigate(frontEndRoutes.dashboard)
+        }else{
+            navigate(frontEndRoutes.login)
+        }
+    },[loggedInUserEmail])
     const getAllExpense = async () => {
         try {
             const response = await getRequest(ENDPOINTS.ALL_PERSONAL_EXPENSE, true);
@@ -106,36 +117,6 @@ export default function Dashboard() {
 
     return (
         <div className="min-h-screen bg-gray-100">
-                    <nav className="bg-white shadow-md">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between h-16">
-                        <div className="flex">
-                            <div className="flex-shrink-0 flex items-center">
-                                <span className="text-2xl font-bold text-gray-800">FundFusion</span>
-                            </div>
-                            <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-                                <a href="#" className="border-indigo-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-                                    <HomeIcon className="mr-1 h-5 w-5" />
-                                    Dashboard
-                                </a>
-                                <a href="#" className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-                                    <ChartPieIcon className="mr-1 h-5 w-5" />
-                                    Charts
-                                </a>
-                                <a href="#" className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-                                    <UsersIcon className="mr-1 h-5 w-5" />
-                                    Friends
-                                </a>
-                                <a href="#" className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-                                    <Cog6ToothIcon className="mr-1 h-5 w-5" />
-                                    Settings
-                                </a>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            </nav>
             <main className="max-w-3xl mx-auto py-6 sm:px-6 lg:px-8">
                 <div className="px-4 py-6 sm:px-0">
                     <h1 className="text-3xl font-bold text-gray-900 mb-6">Recent Expenses</h1>
