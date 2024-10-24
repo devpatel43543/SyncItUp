@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { ENDPOINTS } from "../utils/Constants";
 import AuthContext from "../context/AuthContext";
 import ApiCallingContext from "../context/ApiCallingContext";
-import { Link, useNavigate } from "react-router-dom";
+import {  useNavigate } from "react-router-dom";
 import { toast, ToastContainer, Bounce } from "react-toastify";
 import { HttpStatusCode } from "axios";
 import Button from "../components/Button";
@@ -71,7 +71,6 @@ function VerifyOtp() {
     const handleResendOtp = async () => {
       try {
           const response = await postRequest(ENDPOINTS.RESEND_OTP, false);
-          const result = response.data;
           
           if (response.status === HttpStatusCode.Created) {
               toast.success("OTP has been resent successfully!", {
