@@ -34,7 +34,7 @@ function VerifyOtp() {
             const result = response.data
             console.log("hear is result",result,"and response status",response.status , "and hTTP status",HttpStatusCode.Created)
             if(result.data.token != null){
-              toast.success("Email varification completed!", {
+              toast.success("Email verification completed!", {
                 position: "top-right",
                 autoClose: 3000,
                 hideProgressBar: false,
@@ -110,7 +110,7 @@ function VerifyOtp() {
         <div class="relative px-4 py-10 bg-white shadow-lg sm:rounded-3xl sm:p-20">
           <div class="max-w-md mx-auto">
             <div>
-              <h1 class="text-2xl font-semibold">VerifyOtp</h1>
+              <h1 class="text-2xl font-semibold">Verify OTP</h1>
             </div>
             <div class="divide-y divide-gray-200">
               <div class="py-8 text-base leading-6 space-y-4 text-gray-700 sm:text-lg sm:leading-7">
@@ -128,12 +128,12 @@ function VerifyOtp() {
                     for="email"
                     class="absolute left-0 -top-3.5 text-gray-600 text-sm peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-440 peer-placeholder-shown:top-2 transition-all peer-focus:-top-3.5 peer-focus:text-gray-600 peer-focus:text-sm"
                   >
-                    otp varification
+                    otp verification
                   </label>
                 </div>
 
                 <button class="text-blue-500 text-xs underline" onClick={handleResendOtp}>
-                  resend Otp
+                  Resend Otp
                 </button>
 
                 <div class="relative">
@@ -148,7 +148,7 @@ function VerifyOtp() {
                     isSubmitting={isLoading}
                     className="rounded-md px-2 py-1"
                   >
-                    verify
+                    Verify
                   </Button>
                 </div>
               </div>

@@ -119,7 +119,7 @@ function Login() {
 
         } catch (error) {
             console.error("Registration failed:", error);
-            toast.error("Sign In failed", {
+            toast.error("Invalid email or password", {
                 position: "top-right",
                 autoClose: 3000,
                 hideProgressBar: false,

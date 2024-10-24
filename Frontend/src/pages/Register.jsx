@@ -123,7 +123,7 @@ function Register() {
                   });  
             }
         } catch (error) {
-            toast.error("registration faild", {
+            toast.error("User already exist", {
                 position: "top-right",
                 autoClose: 3000,
                 hideProgressBar: false,
