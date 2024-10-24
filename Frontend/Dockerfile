@@ -3,6 +3,8 @@ FROM node:18-alpine AS build
 
 WORKDIR /app
 
+ARG PROFILE
+
 # Copy package files and install dependencies
 COPY package*.json ./
 RUN npm install
@@ -11,7 +13,11 @@ RUN npm install
 COPY . .
 
 # Build the React app with Vite
-RUN npm run build
+RUN if [[ "$PROFILE" == "dev" || "$PROFILE" == "prod" ]]; then \
+      npm run build:$PROFILE; \
+    else \
+      npm run build; \
+    fi
 
 # Stage for serving the app
 FROM nginx:alpine

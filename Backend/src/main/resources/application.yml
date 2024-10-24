@@ -24,5 +24,8 @@ spring:
           ssl:
             protocols: TLSv1.2
 
+frontend:
+  port: 80
+
 
 
