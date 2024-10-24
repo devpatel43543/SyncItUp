@@ -62,27 +62,3 @@ const IncludeNavbar = ({ Component }) => (
 );
 
 export default App;
-
-/*
-<Router>
-<Routes>
-    <Route
-        path="/"
-        element={
-            isAuthenticated ? <Navigate to="/Dashboard" /> : <SignUp onLoginSuccess={handleLoginSuccess} />
-        }
-    />
-    <Route
-        path="/verify-otp"
-        element={<VerifyOtp onOtpVerificationSuccess={handleOtpVerificationSuccess} />}
-    />
-    <Route
-        path="/Dashboard"
-        element={
-            isAuthenticated ? <Dashboard onLogout={handleLogout} /> : <Navigate to="/" />
-        }
-    />
-    <Route path="/forgot-password" element={<ForgotPassword />} />
-    <Route path="/password_reset" element={<ResetPassword />} />
-</Routes>
-</Router>*/
