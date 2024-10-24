@@ -77,7 +77,7 @@ export default function Dashboard() {
             try {
                 const response = await postRequest(ENDPOINTS.CREATE_PERSONAL_EXPENSE, true, expenseData);
                 if (response.data.result === "SUCCESS") {
-                    setExpenses([...expenses, { ...expenseData, txnId: response.data.data.txnId }]);
+                    setExpenses([...expenses, { ...response.data.data, txnId: response.data.data.txnId }]);
                     // Fetch categories after adding expense
                     getAllCategories();
                 }
