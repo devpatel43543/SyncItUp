@@ -52,8 +52,7 @@
         private final GroupRepository groupRepository;
         private final PendingGroupMembersRepository pendingGroupMembershipRepository;
         private final UserGroupRepository userGroupRepository;
-        @Value("${frontend.port}")
-        private int frontendPort;
+        private final int frontendPort = 80;
         private final ResetTokenService resetTokenService;
         private final JavaMailSender javaMailSender;
         private final OtpService otpService;
