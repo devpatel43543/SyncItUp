@@ -4,6 +4,8 @@ services:
     build:
       context: ./Frontend
       dockerfile: Dockerfile
+      args:
+        - PROFILE=${PROFILE}
     ports:
       - "80:80" 
 

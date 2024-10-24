@@ -19,6 +19,8 @@ logging:
   level:
     org:
       springframework: DEBUG
+frontend:
+  port: 80
 
 # Instructions for testing in a local environment:
 # 1. Create a database named 'fundfusion' in your MySQL server.

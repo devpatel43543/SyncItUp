@@ -7,7 +7,6 @@ spring:
     password:
     platform: h2
     initialization-mode: always
-
   h2:
     console:
       enabled: true
@@ -25,6 +24,8 @@ logging:
         jdbd: DEBUG
       hibernate:
         SQL: DEBUG
+frontend:
+  port: 5173
 
 
 #If you want to use some other database other than H2, just change the config accordingly. ## DO NOT COMMIT YOUR CHANGED FILE

@@ -26,6 +26,7 @@
     import jakarta.transaction.Transactional;
     import lombok.RequiredArgsConstructor;
     import lombok.extern.slf4j.Slf4j;
+    import org.springframework.beans.factory.annotation.Value;
     import org.springframework.mail.javamail.JavaMailSender;
     import org.springframework.mail.javamail.MimeMessageHelper;
     import org.springframework.security.authentication.AuthenticationManager;
@@ -51,7 +52,8 @@
         private final GroupRepository groupRepository;
         private final PendingGroupMembersRepository pendingGroupMembershipRepository;
         private final UserGroupRepository userGroupRepository;
-        private final int frontendPort = 5173;
+        @Value("${frontend.port}")
+        private int frontendPort;
         private final ResetTokenService resetTokenService;
         private final JavaMailSender javaMailSender;
         private final OtpService otpService;
