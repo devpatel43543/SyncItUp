@@ -123,15 +123,17 @@
         }
 
         @Override
-        public String getURL(HttpServletRequest request) {
-            // Generate the site URL without the servlet path
-            String siteURL = request.getRequestURL().toString().replace(request.getServletPath(), "");
-
+        public String getURL(HttpServletRequest request) {String siteURL = request.getRequestURL().toString().replace(request.getServletPath(), "");
             try {
                 java.net.URL oldURL = new java.net.URL(siteURL);
-                // Create a new URL with the frontend port if necessary
-                java.net.URL newURL = new java.net.URL(oldURL.getProtocol(), oldURL.getHost(), frontendPort, oldURL.getFile());
-                return newURL.toString();
+
+                // Use port only if running locally (optional)
+                if ("localhost".equalsIgnoreCase(oldURL.getHost())) {
+                    return new java.net.URL(oldURL.getProtocol(), oldURL.getHost(), frontendPort, oldURL.getFile()).toString();
+                }
+
+                // On your VM, return the URL without a port
+                return new java.net.URL(oldURL.getProtocol(), oldURL.getHost(), oldURL.getFile()).toString();
             } catch (Exception e) {
                 throw new RuntimeException("Failed to construct the correct URL", e);
             }
