@@ -1,54 +1,64 @@
-import React, { useState } from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import SignUp from './pages/Signup.jsx';
-import VerifyOtp from './pages/Otp-verification.jsx';
-import Dashboard from './pages/Dashboard.jsx';
-import ForgotPassword from './pages/Forget-password.jsx';
-import ResetPassword from './pages/Reset-password.jsx';
-import { AUTH_TOKEN } from './utils/Constants.js';
+import React, { Suspense, useState } from "react";
+import {
+    Route,
+    Routes,
+} from "react-router-dom";
 
+import { frontEndRoutes } from "./utils/FrontendRoutes.js";
+import LoadAnimation from "./components/LoadAnimation.jsx";
+import Navbar from "./components/Navbar.jsx";
+
+const login = React.lazy(() => import("./pages/Login"));
+const register = React.lazy(() => import("./pages/Register"));
+const verifyOtp = React.lazy(() => import("./pages/VerifyOtp"));
+const loadingAnimation = React.lazy(() => import("./components/LoadAnimation"));
+const dashboard = React.lazy(() => import("./pages/Dashboard"));
+const forgotPassword = React.lazy(()=>import("./pages/ForgotPassword"))
+const resetPassword= React.lazy(()=>import("./pages/ResetPassword.jsx"))
 function App() {
-    const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem(AUTH_TOKEN));
-
-    const handleLoginSuccess = (token) => {
-        localStorage.setItem(AUTH_TOKEN, token);
-        setIsAuthenticated(true);
-    };
-
-    const handleLogout = () => {
-        localStorage.removeItem(AUTH_TOKEN);
-        setIsAuthenticated(false);
-    };
-
-    const handleOtpVerificationSuccess = (token) => {
-        //localStorage.setItem(AUTH_TOKEN, token);
-        setIsAuthenticated(true);  
-    };
-
     return (
-        <Router>
-            <Routes>
-                <Route
-                    path="/"
-                    element={
-                        isAuthenticated ? <Navigate to="/Dashboard" /> : <SignUp onLoginSuccess={handleLoginSuccess} />
-                    }
-                />
-                <Route
-                    path="/verify-otp"
-                    element={<VerifyOtp onOtpVerificationSuccess={handleOtpVerificationSuccess} />}
-                />
-                <Route
-                    path="/Dashboard"
-                    element={
-                        isAuthenticated ? <Dashboard onLogout={handleLogout} /> : <Navigate to="/" />
-                    }
-                />
-                <Route path="/forgot-password" element={<ForgotPassword />} />
-                <Route path="/password_reset" element={<ResetPassword />} />
-            </Routes>
-        </Router>
+        <Routes>
+            
+            <Route
+                path={frontEndRoutes.login}
+                element={<ExcludeNavbar Component={login} />}
+            />
+            <Route
+                path={frontEndRoutes.register}
+                element={<ExcludeNavbar Component={register} />}
+            />
+            <Route
+                path={frontEndRoutes.verifyOtp}
+                element={<ExcludeNavbar Component={verifyOtp} />}
+            />
+            <Route
+                path={frontEndRoutes.dashboard}
+                element={<IncludeNavbar Component={dashboard} />}
+            />
+            <Route
+                path={frontEndRoutes.forgotPassword}
+                element={<ExcludeNavbar Component={forgotPassword} />}
+            />
+            <Route
+                path={frontEndRoutes.resetPassword}
+                element={<ExcludeNavbar Component={resetPassword} />}
+            />
+        </Routes>
     );
 }
+
+const ExcludeNavbar = ({ Component }) => (
+    <Suspense fallback={<LoadAnimation />}>
+        <Component />
+    </Suspense>
+);
+const IncludeNavbar = ({ Component }) => (
+    <>
+        <Navbar />
+        <Suspense fallback={<LoadAnimation />}>
+            <Component />
+        </Suspense>
+    </>
+);
 
 export default App;

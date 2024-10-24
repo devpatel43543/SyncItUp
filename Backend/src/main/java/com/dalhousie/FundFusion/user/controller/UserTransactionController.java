@@ -1,6 +1,7 @@
 package com.dalhousie.FundFusion.user.controller;
 
 import com.dalhousie.FundFusion.dto.DateRangeEntity;
+import com.dalhousie.FundFusion.user.entity.User;
 import com.dalhousie.FundFusion.user.requestEntity.UserTransactionRequest;
 import com.dalhousie.FundFusion.user.responseEntity.UserTransactionResponse;
 import com.dalhousie.FundFusion.user.service.UserTransactionService;
@@ -25,11 +26,14 @@ public class UserTransactionController {
     @PostMapping("/logTransaction")
     public ResponseEntity<CustomResponseBody<UserTransactionResponse>> logTransaction(@RequestBody UserTransactionRequest userTransactionRequest){
         try{
+            //UserTransactionResponse userTransactionResponse = userTransactionService.logTransaction(userTransactionRequest);
+            //log.info(userTransactionResponse.toString());
             CustomResponseBody<UserTransactionResponse> responseBody = new CustomResponseBody<>(
                     CustomResponseBody.Result.SUCCESS,
                     userTransactionService.logTransaction(userTransactionRequest),
                     "Transaction logged successfully"
             );
+
             return ResponseEntity.status(HttpStatus.CREATED).body(responseBody);
         }
         catch (Exception e){
@@ -98,7 +102,8 @@ public class UserTransactionController {
             CustomResponseBody<UserTransactionResponse> responseBody = new CustomResponseBody<>(
                     CustomResponseBody.Result.FAILURE,
                     null,
-                    "Something went wrong");
+                    "Transaction not found"
+            );
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseBody);
         }
     }
