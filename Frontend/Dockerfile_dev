@@ -1,0 +1,15 @@
+# Use an official Node.js image as the base
+FROM node:18-alpine
+# Set the working directory
+WORKDIR /app/fundfusion
+# Copy package files and install dependencies
+COPY package*.json ./
+RUN npm install
+# Copy the rest of the frontend code
+COPY . .
+# Build the React app with Vite based on the profile passed as an argument
+RUN npm run build:dev;
+# Expose the dynamic port (make sure this works at runtime, not build time)
+EXPOSE 80
+# Set the entrypoint to use the correct profile
+ENTRYPOINT ["sh", "-c", "npm run preview:dev"]
