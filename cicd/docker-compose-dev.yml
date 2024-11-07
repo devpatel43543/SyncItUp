@@ -1,0 +1,19 @@
+version: "3.3"
+services:
+  frontend:
+    build:
+      context: ../Frontend
+      dockerfile: Dockerfile_dev
+      args:
+        - PROFILE=dev
+    ports:
+      - "80:80"
+
+  backend:
+    build:
+      context: ../Backend
+      dockerfile: Dockerfile_dev
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+    ports:
+      - "8080:8080"
