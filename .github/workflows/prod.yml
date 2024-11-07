@@ -16,6 +16,6 @@ jobs:
       - name: Deploy Application
         run: |
           cd cicd && 
-          docker-compose -f docker-compose-dev.yml up --build --force-recreate -d
+          docker-compose -f docker-compose-prod.yml up --build --force-recreate -d
 
 
