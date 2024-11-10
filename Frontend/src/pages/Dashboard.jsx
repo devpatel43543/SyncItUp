@@ -1,16 +1,18 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { PlusIcon, HomeIcon, ChartPieIcon, UsersIcon, Cog6ToothIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, HomeIcon, ChartPieIcon, UsersIcon, Cog6ToothIcon, PencilIcon, TrashIcon,TagIcon } from '@heroicons/react/24/outline';
 import { ENDPOINTS } from '../utils/Constants';
 import ApiCallingContext from '../context/ApiCallingContext';
 import Navbar from '../components/Navbar';
 import { frontEndRoutes } from '../utils/FrontendRoutes';
 import AuthContext from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import AddCategory from '../components/AddCategory';
 export default function Dashboard() {
     const { getRequest, postRequest, putRequest, deleteRequest } = useContext(ApiCallingContext);
     const [expenses, setExpenses] = useState([]);
     const [categories, setCategories] = useState([]); 
     const [showModal, setShowModal] = useState(false);
+    const [showAddCategory, setShowAddCategory] = useState(false);
     const [editingExpense, setEditingExpense] = useState(null);
     const [newExpense, setNewExpense] = useState({
         date: "",
@@ -150,6 +152,9 @@ export default function Dashboard() {
             <button onClick={() => setShowModal(true)} className="fixed bottom-4 right-4 bg-indigo-600 text-white rounded-full p-3 shadow-lg hover:bg-indigo-700 transition-colors duration-200">
                 <PlusIcon className="h-6 w-6" />
             </button>
+            <button onClick={() => setShowAddCategory(true)} className="fixed bottom-20 right-4 bg-indigo-600 text-white rounded-full p-3 shadow-lg hover:bg-indigo-700 transition-colors duration-200">
+                <TagIcon className="h-6 w-6" />
+            </button>
 
             {/* Modal for adding/updating expenses */}
             {showModal && (
@@ -218,6 +223,10 @@ export default function Dashboard() {
                     </div>
                 </div>
             )}
+
+            {showAddCategory && <AddCategory categories={categories} />}
+
+
         </div>
     );
 }

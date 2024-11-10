@@ -17,5 +17,7 @@ export const ENDPOINTS = {
     ALl_GROUP:"/group/allGroup",
     ADD_NEW_MEMBER:"/group/addNewMember",
     INDIVIDUAL_GROUP:"/group/individual",
-    REMOVE_MEMBER:"/group/removeMember"
+    REMOVE_MEMBER:"/group/removeMember",
+    ADD_CATEGORY:"/category/addCategory",
+    REMOVE_CATEGORY:"/category/deleteCategory"
 }
