@@ -63,6 +63,7 @@ public class CategoryServiceImpl implements CategoryService{
                     CategoryResponse.builder()
                         .categoryId(category.getCategoryId())
                         .category(category.getCategoryName())
+                        .isDefault(category.isDefault())
                         .build())
                 .collect(Collectors.toList());
     }
