@@ -92,10 +92,11 @@ export default function Dashboard() {
 
     const handleEdit = (expense) => {
         setEditingExpense(expense);
+        let categoryId = categories.filter(category => expense.category == category.category)[0].categoryId
         setNewExpense({
             date: expense.txnDate,
             amount: expense.expense.toString(),
-            category: expense.categoryId?.toString() || "",
+            category: categoryId || "",
             description: expense.txnDesc,
         });
         setShowModal(true);
