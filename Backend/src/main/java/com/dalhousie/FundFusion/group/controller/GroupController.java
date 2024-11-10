@@ -1,6 +1,9 @@
 package com.dalhousie.FundFusion.group.controller;
 
 
+import com.dalhousie.FundFusion.exception.AccessDeniedException;
+import com.dalhousie.FundFusion.exception.GroupAlreadyExistsException;
+import com.dalhousie.FundFusion.group.requestEntity.AddNewMemberRequest;
 import com.dalhousie.FundFusion.group.requestEntity.GroupRequest;
 import com.dalhousie.FundFusion.group.requestEntity.GroupUpdateRequest;
 import com.dalhousie.FundFusion.group.responseEntity.GroupResponse;
@@ -23,12 +26,19 @@ public class GroupController {
     private final GroupService groupService;
     @PostMapping("/create")
     public ResponseEntity<CustomResponseBody<GroupResponse>> createGroup(@RequestBody GroupRequest groupRequest) {
+        log.info("line number 26 from groupController:{}", groupRequest);
+
         try {
             GroupResponse response = groupService.createGroup(groupRequest);
             log.info("User registered successfully with email: {}", response.getGroupName());
             CustomResponseBody<GroupResponse> responseBody =new CustomResponseBody<>(CustomResponseBody.Result.SUCCESS,response,"group created successfully");
             return ResponseEntity.status(HttpStatus.CREATED).body(responseBody);
-        }catch (Exception e) {
+        }catch (GroupAlreadyExistsException e){
+            log.error("Unexpected error during user registration: {}", e.getMessage());
+            CustomResponseBody<GroupResponse> responseBody = new CustomResponseBody<>(CustomResponseBody.Result.FAILURE, null, "Something went wrong");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(responseBody);
+        }
+        catch (Exception e) {
             log.error("Unexpected error during user registration: {}", e.getMessage());
             CustomResponseBody<GroupResponse> responseBody = new CustomResponseBody<>(CustomResponseBody.Result.FAILURE, null, "Something went wrong");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseBody);
@@ -38,6 +48,7 @@ public class GroupController {
     public ResponseEntity<CustomResponseBody<List<GroupSummaryResponse>>> getAllGroups() {
         try {
             List<GroupSummaryResponse> groupResponses = groupService.getAllGroups();
+            log.info("line 49:{}",groupResponses.toString());
             CustomResponseBody<List<GroupSummaryResponse>> responseBody = new CustomResponseBody<>(
                     CustomResponseBody.Result.SUCCESS,
                     groupResponses,
@@ -76,15 +87,30 @@ public class GroupController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseBody);
         }
     }
-    @DeleteMapping("/deleteMember")
-    public ResponseEntity<CustomResponseBody<GroupResponse>> deleteMember(
+    @PostMapping("/addNewMember")
+    public ResponseEntity<CustomResponseBody<GroupResponse>> addNewMember(@RequestParam Integer groupId, @RequestBody AddNewMemberRequest request) {
+        try{
+            GroupResponse response = groupService.addGroupMembers(groupId, request.getNewMemberEmails());
+            CustomResponseBody<GroupResponse> responseBody = new CustomResponseBody<>(
+                    CustomResponseBody.Result.SUCCESS,
+                    response,
+                    "Members added successfully"
+            );
+            return ResponseEntity.status(HttpStatus.CREATED).body(responseBody);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @DeleteMapping("/removeMember")
+    public ResponseEntity<CustomResponseBody<GroupResponse>> removeMember(
             @RequestParam Integer groupId,
-            @RequestParam Integer memberId) {
+            @RequestParam String memberEmail) {
 
         try {
             log.info("group:{}", groupId);
-            log.info("member:{}", memberId);
-            GroupResponse response = groupService.deleteGroupMember(groupId, memberId);
+            log.info("member:{}", memberEmail);
+            GroupResponse response = groupService.removeGroupMember(groupId, memberEmail);
             log.info("User deleted successfully from group: {}, member email: {}", groupId, response.getMembers());
 
             CustomResponseBody<GroupResponse> responseBody = new CustomResponseBody<>(
@@ -94,7 +120,12 @@ public class GroupController {
             );
             return ResponseEntity.status(HttpStatus.OK).body(responseBody);
 
-        } catch (Exception e) {
+        }catch(AccessDeniedException e){
+            log.error("Access denied exception: {}", e.getMessage());
+            CustomResponseBody<GroupResponse> responseBody = new CustomResponseBody<>(CustomResponseBody.Result.FAILURE, null, "Something went wrong");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseBody);
+        }
+        catch (Exception e) {
             log.error("Unexpected error during member deletion: {}", e.getMessage());
 
             CustomResponseBody<GroupResponse> responseBody = new CustomResponseBody<>(

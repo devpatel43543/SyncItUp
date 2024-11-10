@@ -9,9 +9,10 @@ import java.util.List;
 
 public interface GroupService {
     GroupResponse createGroup(GroupRequest groupRequest);
-    GroupResponse deleteGroupMember(Integer groupId, Integer memberId);
+    GroupResponse removeGroupMember(Integer groupId, String memberEmail);
     GroupResponse updateGroup(Integer groupId, GroupUpdateRequest updateRequest);
     List<GroupSummaryResponse> getAllGroups();
     GroupResponse getGroupById(Integer groupId);
+    GroupResponse addGroupMembers(Integer groupId, List<String> newMemberEmails);
 }
 

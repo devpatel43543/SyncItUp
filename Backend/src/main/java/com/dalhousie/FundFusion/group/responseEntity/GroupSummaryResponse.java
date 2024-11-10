@@ -14,4 +14,6 @@ public class GroupSummaryResponse {
     private String groupName;
     private String description;
     private String creatorEmail;
+    private List<String> members; // New field for member emails
+
 }

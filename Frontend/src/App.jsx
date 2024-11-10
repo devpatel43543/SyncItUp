@@ -15,6 +15,10 @@ const loadingAnimation = React.lazy(() => import("./components/LoadAnimation"));
 const dashboard = React.lazy(() => import("./pages/Dashboard"));
 const forgotPassword = React.lazy(()=>import("./pages/ForgotPassword"))
 const resetPassword= React.lazy(()=>import("./pages/ResetPassword.jsx"))
+const createGroup = React.lazy(()=>import("./pages/CreateGroup.jsx"))
+const groupExpenseDashboard = React.lazy(()=>import("./pages/GroupDashboard.jsx"))
+const AddNewMember = React.lazy(()=>import("./pages/AddNewMember.jsx"))
+const RemoveMember = React.lazy(()=>import("./pages/RemoveMember.jsx"))
 function App() {
     return (
         <Routes>
@@ -42,6 +46,22 @@ function App() {
             <Route
                 path={frontEndRoutes.resetPassword}
                 element={<ExcludeNavbar Component={resetPassword} />}
+            />
+            <Route
+                path={frontEndRoutes.createGroup}
+                element = {<IncludeNavbar Component={createGroup}/>}
+            />
+            <Route
+                path={frontEndRoutes.groupExpenseDashboard}
+                element = {<IncludeNavbar Component={groupExpenseDashboard}/>}
+            />
+            <Route
+                path={`${frontEndRoutes.add_new_member}/:groupId`}
+                element = {<IncludeNavbar Component={AddNewMember}/>}
+            />
+            <Route
+                path={`${frontEndRoutes.remove_member}/:groupId`}
+                element={<IncludeNavbar Component={RemoveMember}/>}
             />
         </Routes>
     );

@@ -5,5 +5,9 @@ export const frontEndRoutes = {
     dashboard:"/dashboard",
     verifyOtp:"/verifyOtp",
     forgotPassword:"/forgotPassword",
-    resetPassword:"/resetPassword"
+    resetPassword:"/resetPassword",
+    createGroup:"/createGroup",
+    groupExpenseDashboard:"/allGroups",
+    add_new_member:"/newMember",
+    remove_member:"/removeMember"
 }
