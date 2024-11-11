@@ -155,7 +155,7 @@ export default function Dashboard() {
             <button onClick={() => setShowAddCategory(true)} className="fixed bottom-20 right-4 bg-indigo-600 text-white rounded-full p-3 shadow-lg hover:bg-indigo-700 transition-colors duration-200">
                 <TagIcon className="h-6 w-6" />
             </button>
-
+            
             {/* Modal for adding/updating expenses */}
             {showModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
@@ -224,7 +224,7 @@ export default function Dashboard() {
                 </div>
             )}
 
-            {showAddCategory && <AddCategory categories={categories} />}
+            {showAddCategory && <AddCategory categories={categories} setShowAddCategory={isShow => setShowAddCategory(isShow)} />}
 
 
         </div>

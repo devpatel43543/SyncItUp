@@ -1,9 +1,10 @@
 
 import { Trash2 } from 'lucide-react';
+import { IoMdClose } from "react-icons/io";
 import { ENDPOINTS } from '../utils/Constants';
 import ApiCallingContext from '../context/ApiCallingContext';
 import { useState, useContext, useEffect} from 'react';
-export default function AddCategory({categories}){
+export default function AddCategory({categories, setShowAddCategory}){
 
     const { postRequest, deleteRequest} = useContext(ApiCallingContext);
     const [categoryName, setCategoryName] = useState('');
@@ -43,7 +44,14 @@ export default function AddCategory({categories}){
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
             <div className="bg-white rounded-lg shadow-lg p-6"> 
                 <div className='mx-auto w-full max-w-[550px]'>
-                    <h2 className="text-xl font-semibold mb-4">Edit Categories</h2>
+                    <div className='flex justify-between items-center'>
+                        <h2 className="text-xl font-semibold mb-4">Edit Categories</h2>
+                        <button
+                            onClick={() => setShowAddCategory(false)} 
+                            className="relative bottom-2  text-grey-500 hover:text-grey-700 p-1 rounded-full">
+                            <IoMdClose className="w-5 h-4" /> 
+                        </button>
+                    </div>
                     <form className='space-y-4'>
                         <div className='mb-5'>
                             <label className='mb-3 block text-base font-medium text-[#07074D]'>
