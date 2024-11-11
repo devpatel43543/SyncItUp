@@ -57,9 +57,6 @@ export default function Dashboard() {
         const { name, value } = e.target;
         setNewExpense({ ...newExpense, [name]: value });
     };
-    const resetForm = () => {
-        setNewExpense({ date: "", amount: "", category: "", description: "" });
-    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -75,6 +72,7 @@ export default function Dashboard() {
                 const response = await putRequest(ENDPOINTS.UPDATE_EXPENSE, true, { ...expenseData, txnId: editingExpense.txnId });
 
                 setExpenses(expenses.map(expense => (expense.txnId === editingExpense.txnId ? { ...response.data.data, txnId: expense.txnId } : expense)));
+                setEditingExpense(null);
             } catch (error) {
                 console.error("Error updating expense:", error);
             }
@@ -85,13 +83,12 @@ export default function Dashboard() {
                     setExpenses([...expenses, { ...response.data.data, txnId: response.data.data.txnId }]);
                     // Fetch categories after adding expense
                     getAllCategories();
-
                 }
             } catch (error) {
                 console.error("Error adding expense:", error);
             }
         }
-        resetForm();
+        setNewExpense({ date: "", amount: "", category: "", description: "" });
         setShowModal(false);
     };
 
@@ -228,7 +225,7 @@ export default function Dashboard() {
                 </div>
             )}
 
-            {showAddCategory && <AddCategory categories={categories} setShowAddCategory={isShow => setShowAddCategory(isShow)} onCategoryAdded={getAllCategories}/>}
+            {showAddCategory && <AddCategory categories={categories} setShowAddCategory={isShow => setShowAddCategory(isShow)} onCategoryAdded={getAllCategories} />}
 
 
         </div>
