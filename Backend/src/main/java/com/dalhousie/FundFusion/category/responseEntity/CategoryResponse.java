@@ -13,5 +13,6 @@ public class CategoryResponse {
 
     private Integer categoryId;
     private String category;
+    private boolean isDefault;
 
 }
