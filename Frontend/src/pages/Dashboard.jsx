@@ -57,6 +57,9 @@ export default function Dashboard() {
         const { name, value } = e.target;
         setNewExpense({ ...newExpense, [name]: value });
     };
+    const resetForm = () => {
+        setNewExpense({ date: "", amount: "", category: "", description: "" });
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -88,7 +91,7 @@ export default function Dashboard() {
                 console.error("Error adding expense:", error);
             }
         }
-        setNewExpense({ date: "", amount: "", category: "", description: "" });
+        resetForm();
         setShowModal(false);
     };
 
