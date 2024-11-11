@@ -75,7 +75,6 @@ export default function Dashboard() {
                 const response = await putRequest(ENDPOINTS.UPDATE_EXPENSE, true, { ...expenseData, txnId: editingExpense.txnId });
 
                 setExpenses(expenses.map(expense => (expense.txnId === editingExpense.txnId ? { ...response.data.data, txnId: expense.txnId } : expense)));
-                setEditingExpense(null);
             } catch (error) {
                 console.error("Error updating expense:", error);
             }
@@ -86,6 +85,7 @@ export default function Dashboard() {
                     setExpenses([...expenses, { ...response.data.data, txnId: response.data.data.txnId }]);
                     // Fetch categories after adding expense
                     getAllCategories();
+
                 }
             } catch (error) {
                 console.error("Error adding expense:", error);
@@ -228,7 +228,7 @@ export default function Dashboard() {
                 </div>
             )}
 
-            {showAddCategory && <AddCategory categories={categories} setShowAddCategory={isShow => setShowAddCategory(isShow)} />}
+            {showAddCategory && <AddCategory categories={categories} setShowAddCategory={isShow => setShowAddCategory(isShow)} onCategoryAdded={getAllCategories}/>}
 
 
         </div>
