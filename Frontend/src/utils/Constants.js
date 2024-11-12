@@ -19,5 +19,7 @@ export const ENDPOINTS = {
     INDIVIDUAL_GROUP:"/group/individual",
     REMOVE_MEMBER:"/group/removeMember",
     ADD_CATEGORY:"/category/addCategory",
-    REMOVE_CATEGORY:"/category/deleteCategory"
+    REMOVE_CATEGORY:"/category/deleteCategory",
+    TRANSACTIONS_BY_DATE: '/user/transaction/getTransactionsBetweenDate',
+    TRANSACTIONS_BY_CATEGORY: '/user/transaction/getTransactionsWithCategory'
 }
