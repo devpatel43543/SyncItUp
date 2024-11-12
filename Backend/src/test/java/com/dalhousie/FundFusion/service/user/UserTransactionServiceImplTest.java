@@ -13,10 +13,10 @@ import com.dalhousie.FundFusion.user.service.UserService;
 import com.dalhousie.FundFusion.user.service.UserTransactionServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -29,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 class UserTransactionServiceImplTest {
 
     @Mock
@@ -60,11 +60,12 @@ class UserTransactionServiceImplTest {
         mockUser.setEmail("testuser@example.com");
         mockUser.setPassword("password123");
         mockUser.setEmailVerified(true);
+
         when(userService.getCurrentUser()).thenReturn(mockUser);
 
         Authentication authentication = mock(Authentication.class);
-        when(authentication.getPrincipal()).thenReturn(mockUser);
-        when(SecurityContextHolder.getContext().getAuthentication()).thenReturn(authentication);
+        lenient().when(authentication.getPrincipal()).thenReturn(mockUser);
+        lenient().when(SecurityContextHolder.getContext().getAuthentication()).thenReturn(authentication);
 
         Category mockCategory = new Category();
         mockCategory.setCategoryName("Food");
