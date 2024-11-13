@@ -70,31 +70,42 @@ class AuthenticationServiceImplTest {
 
     @Test
     void ShouldRegisterUser_WhenUserDoesNotExist() {
+        try {
 
-        RegisterRequest registerRequest = new RegisterRequest("John Doe", "johndoe@example.com", "password");
-        when(userRepository.findByEmail(registerRequest.getEmail())).thenReturn(Optional.empty());
-        when(passwordEncoder.encode(registerRequest.getPassword())).thenReturn("encodedPassword");
+            RegisterRequest registerRequest = new RegisterRequest("John Doe", "johndoe@example.com", "password");
 
-        doAnswer(invocation -> {
-            User userBeingSaved = invocation.getArgument(0);
-            userBeingSaved.setId(1);
-            return userBeingSaved;
-        }).when(userRepository).save(any(User.class));
+            when(userRepository.findByEmail(registerRequest.getEmail())).thenReturn(Optional.empty());
 
-        Otp mockOtp = new Otp();
-        mockOtp.setOtp("123456");
-        mockOtp.setId(1);
-        when(otpService.generateOtp(1)).thenReturn(mockOtp);
+            when(passwordEncoder.encode(registerRequest.getPassword())).thenReturn("encodedPassword");
 
-        when(javaMailSender.createMimeMessage()).thenReturn(mimeMessage);
-        when(mimeMessageHelper.getMimeMessage()).thenReturn(mimeMessage);
-        doNothing().when(javaMailSender).send(mimeMessage);
+            doAnswer(invocation -> {
+                User userBeingSaved = invocation.getArgument(0);
+                userBeingSaved.setId(1);
+                return userBeingSaved;
+            }).when(userRepository).save(any(User.class));
 
-        AuthenticationResponse response = authenticationService.registerUser(registerRequest);
+            Otp mockOtp = new Otp();
+            mockOtp.setOtp("123456");
+            mockOtp.setId(1);
+            when(otpService.generateOtp(1)).thenReturn(mockOtp);
 
-        assertNull(response.getToken());
-        verify(userRepository, times(1)).save(any(User.class));
-        verify(otpService, times(1)).generateOtp(1);
+            MimeMessage mimeMessage = mock(MimeMessage.class);
+            when(javaMailSender.createMimeMessage()).thenReturn(mimeMessage);
+
+            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage);
+
+            doNothing().when(javaMailSender).send(mimeMessage);
+
+            AuthenticationResponse response = authenticationService.registerUser(registerRequest);
+
+            assertNull(response.getToken());
+            verify(userRepository, times(1)).save(any(User.class));
+            verify(otpService, times(1)).generateOtp(1);
+            verify(javaMailSender, times(1)).send(mimeMessage);
+
+        } catch (Exception e) {
+            fail("Test failed due to unexpected exception: " + e.getMessage());
+        }
     }
 
     @Test
