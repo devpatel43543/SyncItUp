@@ -232,7 +232,7 @@ export default function Dashboard() {
                 </div>
             )}
 
-            {showAddCategory && <AddCategory categories={categories} setShowAddCategory={isShow => setShowAddCategory(isShow)} />}
+            {showAddCategory && <AddCategory categories={categories} setShowAddCategory={isShow => setShowAddCategory(isShow)} onCategoryAdded={getAllCategories} />}
 
 
         </div>

@@ -4,7 +4,7 @@ import { IoMdClose } from "react-icons/io";
 import { ENDPOINTS } from '../utils/Constants';
 import ApiCallingContext from '../context/ApiCallingContext';
 import { useState, useContext, useEffect} from 'react';
-export default function AddCategory({categories, setShowAddCategory}){
+export default function AddCategory({categories, setShowAddCategory,onCategoryAdded }){
 
     const { postRequest, deleteRequest} = useContext(ApiCallingContext);
     const [categoryName, setCategoryName] = useState('');
@@ -21,6 +21,7 @@ export default function AddCategory({categories, setShowAddCategory}){
           if (response.data.result === "SUCCESS") {
             setUserDefinedCategories([...userDefinedCategories, response.data.data]);
             setCategoryName('');
+            onCategoryAdded();
           }
         } catch (error) {
           console.error("Error adding category:", error);
