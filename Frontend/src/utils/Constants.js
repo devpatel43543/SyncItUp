@@ -16,8 +16,12 @@ export const ENDPOINTS = {
     CREATE_GROUP:"/group/create",
     ALl_GROUP:"/group/allGroup",
     ADD_NEW_MEMBER:"/group/addNewMember",
+    ALL_MEMBERS:"/group/allMembers",
     INDIVIDUAL_GROUP:"/group/individual",
     REMOVE_MEMBER:"/group/removeMember",
     ADD_CATEGORY:"/category/addCategory",
-    REMOVE_CATEGORY:"/category/deleteCategory"
+    REMOVE_CATEGORY:"/category/deleteCategory",
+    PENDING_REQUEST:"/group/pendingRequests",
+    ACCEPT_REQUEST:"/group/accept",
+    REJECT_REQUEST:"/group/reject"
 }

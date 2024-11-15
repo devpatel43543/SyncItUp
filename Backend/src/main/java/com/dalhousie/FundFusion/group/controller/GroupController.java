@@ -8,6 +8,7 @@ import com.dalhousie.FundFusion.group.requestEntity.GroupRequest;
 import com.dalhousie.FundFusion.group.requestEntity.GroupUpdateRequest;
 import com.dalhousie.FundFusion.group.responseEntity.GroupResponse;
 import com.dalhousie.FundFusion.group.responseEntity.GroupSummaryResponse;
+import com.dalhousie.FundFusion.group.responseEntity.PendingGroupMemberResponse;
 import com.dalhousie.FundFusion.group.service.GroupService;
 import com.dalhousie.FundFusion.util.CustomResponseBody;
 import lombok.RequiredArgsConstructor;
@@ -136,7 +137,23 @@ public class GroupController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseBody);
         }
     }
+    @GetMapping("/allMembers")
+    public ResponseEntity<CustomResponseBody<List<String>>> getAllMembers(@RequestParam Integer groupId) {
+        try {
+            List<String> members = groupService.allMemberEmails(groupId);
+            CustomResponseBody<List<String>> responseBody = new CustomResponseBody<>(CustomResponseBody.Result.SUCCESS,members,"all members successfully fetched");
+            return ResponseEntity.status(HttpStatus.OK).body(responseBody);
+        }catch (Exception e) {
+            log.error("Unexpected error during fetching all members: {}", e.getMessage());
+            CustomResponseBody<List<String>> responseBody = new CustomResponseBody<>(
+                    CustomResponseBody.Result.FAILURE,
+                    null,
+                    "Something went wrong"
+            );
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseBody);
+        }
 
+    }
     @PutMapping("/update")
     public ResponseEntity<CustomResponseBody<GroupResponse>> updateGroup(
             @RequestParam Integer groupId,
@@ -159,6 +176,67 @@ public class GroupController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseBody);
         }
     }
+    @GetMapping("/pendingRequests")
+    public ResponseEntity<CustomResponseBody<List<PendingGroupMemberResponse>>> getAllPendingRequests(
+            ) {
+        try {
+            List<PendingGroupMemberResponse> pendingRequests = groupService.getAllPendingRequest();
+            CustomResponseBody<List<PendingGroupMemberResponse>> responseBody = new CustomResponseBody<>(
+                    CustomResponseBody.Result.SUCCESS,
+                    pendingRequests,
+                    "Pending requests fetched successfully."
+            );
+            return ResponseEntity.status(HttpStatus.OK).body(responseBody);
+        } catch (Exception e) {
+            CustomResponseBody<List<PendingGroupMemberResponse>> responseBody = new CustomResponseBody<>(
+                    CustomResponseBody.Result.FAILURE,
+                    null,
+                    "Failed to fetch pending requests."
+            );
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseBody);
+        }
+    }
 
+    @DeleteMapping("/reject")
+    public ResponseEntity<CustomResponseBody<Void>> rejectPendingMember(
+            @RequestParam Integer groupId) {
+        try {
+            groupService.rejectPendingMember(groupId);
+            CustomResponseBody<Void> responseBody = new CustomResponseBody<>(
+                    CustomResponseBody.Result.SUCCESS,
+                    null,
+                    "Pending group membership rejected successfully."
+            );
+            return ResponseEntity.status(HttpStatus.OK).body(responseBody);
+        } catch (Exception e) {
+            CustomResponseBody<Void> responseBody = new CustomResponseBody<>(
+                    CustomResponseBody.Result.FAILURE,
+                    null,
+                    "Failed to reject pending group membership."
+            );
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseBody);
+        }
+    }
+
+    @PostMapping("/accept")
+    public ResponseEntity<CustomResponseBody<Void>> acceptPendingMember(
+            @RequestParam Integer groupId) {
+        try {
+            groupService.acceptPendingMember(groupId);
+            CustomResponseBody<Void> responseBody = new CustomResponseBody<>(
+                    CustomResponseBody.Result.SUCCESS,
+                    null,
+                    "Pending group membership accepted successfully."
+            );
+            return ResponseEntity.status(HttpStatus.OK).body(responseBody);
+        } catch (Exception e) {
+            CustomResponseBody<Void> responseBody = new CustomResponseBody<>(
+                    CustomResponseBody.Result.FAILURE,
+                    null,
+                    "Failed to accept pending group membership."
+            );
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseBody);
+        }
+    }
 
 }

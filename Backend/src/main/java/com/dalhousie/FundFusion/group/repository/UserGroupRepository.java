@@ -11,5 +11,7 @@ public interface UserGroupRepository extends JpaRepository<UserGroup, Integer> {
     Optional<UserGroup> findByUserIdAndGroupId(Integer memberId, Integer groupId);
     void delete(UserGroup userGroup);
     List<UserGroup> findByUserId(Integer userId);
+    List<UserGroup> findByGroupId(Integer groupId);
+
     Optional<UserGroup> findByUserEmailAndGroupId(String email, Integer groupId);
 }

@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+
 @Entity
 @Data
 @Builder
@@ -28,9 +29,6 @@ public class PendingGroupMembers {
     @ManyToOne
     @JoinColumn(name = "group_id", nullable = false)
     private Group group;
-
-    @Column(nullable = false)
-    private String status = "PENDING";
 
     @Column(nullable = false)
     private LocalDateTime invitedAt = LocalDateTime.now();

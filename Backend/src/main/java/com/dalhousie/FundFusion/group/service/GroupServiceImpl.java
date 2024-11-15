@@ -14,6 +14,7 @@ import com.dalhousie.FundFusion.group.requestEntity.GroupRequest;
 import com.dalhousie.FundFusion.group.requestEntity.GroupUpdateRequest;
 import com.dalhousie.FundFusion.group.responseEntity.GroupResponse;
 import com.dalhousie.FundFusion.group.responseEntity.GroupSummaryResponse;
+import com.dalhousie.FundFusion.group.responseEntity.PendingGroupMemberResponse;
 import com.dalhousie.FundFusion.user.entity.User;
 import com.dalhousie.FundFusion.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -35,34 +36,24 @@ public class GroupServiceImpl implements GroupService{
     private final UserRepository userRepository;
     private final UserGroupRepository userGroupRepository;
     private final PendingGroupMembersRepository pendingGroupMembershipRepository;
-
+    
     @Override
     public GroupResponse createGroup(GroupRequest groupRequest) {
         log.info("line number 41 :{}",groupRequest.getMemberEmail());
         String creatorEmail = getCurrentAuthenticatedUserEmail();
         User creator = userRepository.findByEmail(creatorEmail)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
-
-        // Check if group name already exists
-        if (groupRepository.existsByGroupName(groupRequest.getGroupName())) {
-            throw new GroupAlreadyExistsException("Group name already exists. Please choose a different name.");
-        }
-
-        // Save the group
         Group group = saveGroup(groupRequest, creator);
         addMemberIfNotExists(group, creator.getEmail(), true); // Add creator as a member
 
-        // Collect unique emails to avoid duplicate entry
         Set<String> uniqueEmails = groupRequest.getMemberEmail() != null
                 ? new HashSet<>(groupRequest.getMemberEmail())
                 : new HashSet<>();
 
-        // Add other members
         for (String email : uniqueEmails) {
             addMemberIfNotExists(group, email, false);
         }
 
-        // Prepare response including creator and all other members
         uniqueEmails.add(creator.getEmail());
 
         return GroupResponse.builder()
@@ -78,7 +69,7 @@ public class GroupServiceImpl implements GroupService{
         Group group = validateGroupMembership(groupId); // for validation if the current user is a group member
         log.info("line 80:{}",groupId);
 
-        // Add new members to the group
+
         Set<String> uniqueEmails = new HashSet<>(newMemberEmails);
         for (String email : uniqueEmails) {
             addMemberIfNotExists(group, email, false);
@@ -95,17 +86,31 @@ public class GroupServiceImpl implements GroupService{
     }
 
     @Override
+    public List<String> allMemberEmails(Integer groupId) {
+        List<String> registeredEmails = userGroupRepository.findByGroupId(groupId).stream()
+                .map(userGroup -> userGroup.getUser().getEmail())
+                .collect(Collectors.toList());
+
+        List<String> pendingEmails = pendingGroupMembershipRepository.findByGroupId(groupId).stream()
+                .map(PendingGroupMembers::getEmail)
+                .collect(Collectors.toList());
+
+        Set<String> allEmails = new HashSet<>();
+        allEmails.addAll(registeredEmails);
+        allEmails.addAll(pendingEmails);
+
+        return new ArrayList<>(allEmails);
+    }
+
+    @Override
     public GroupResponse removeGroupMember(Integer groupId, String memberEmail) {
         Group group = validateGroupCreator(groupId);
 
-        // Fetch the user group membership by userId and groupId
         Optional<UserGroup> userGroup = userGroupRepository.findByUserEmailAndGroupId(memberEmail,groupId);
-        //check in both userGroup and pending table
         if(userGroup.isPresent()) {
             UserGroup userGroupUser = userGroup.get();
             userGroupRepository.delete(userGroupUser);
         }else{
-            //check the pending table
             Optional<PendingGroupMembers> pendingGroupMembers = pendingGroupMembershipRepository.findByEmailAndGroupId(memberEmail,groupId);
             if(pendingGroupMembers.isPresent()) {
                 PendingGroupMembers pendingGroupMembersUser = pendingGroupMembers.get();
@@ -114,9 +119,6 @@ public class GroupServiceImpl implements GroupService{
                 throw new MemberNotExist("User is not a member of this group");
             }
         }
-
-
-
         List<String> updatedMembers = getGroupMembersEmails(group);
 
         return GroupResponse.builder()
@@ -131,7 +133,6 @@ public class GroupServiceImpl implements GroupService{
     public GroupResponse updateGroup(Integer groupId, GroupUpdateRequest updateRequest) {
         Group group = validateGroupCreator(groupId);
 
-        // Update the group information
         if (updateRequest.getGroupName() != null) {
             group.setGroupName(updateRequest.getGroupName());
         }
@@ -139,9 +140,7 @@ public class GroupServiceImpl implements GroupService{
             group.setDescription(updateRequest.getDescription());
         }
 
-        // Save the updated group
         groupRepository.save(group);
-        // after deletion member list
         List<String> updatedMembers = getGroupMembersEmails(group);
 
         return GroupResponse.builder()
@@ -162,24 +161,13 @@ public class GroupServiceImpl implements GroupService{
         List<Group> userGroups = getUserGroups(user);
 
         return userGroups.stream().map(group -> {
-            // Get confirmed and pending member emails
-            List<String> confirmedEmails = group.getUserGroups().stream()
-                    .map(userGroup -> userGroup.getUser().getEmail())
-                    .collect(Collectors.toList());
-
-            List<String> pendingEmails = pendingGroupMembershipRepository.findByGroupId(group.getId()).stream()
-                    .map(PendingGroupMembers::getEmail)
-                    .collect(Collectors.toList());
-
-            Set<String> uniqueEmails = new HashSet<>(confirmedEmails);
-            uniqueEmails.addAll(pendingEmails);
-
+            List<String> memberEmails = getGroupMembersEmails(group);
             return GroupSummaryResponse.builder()
                     .groupId(group.getId())
                     .groupName(group.getGroupName())
                     .description(group.getDescription())
                     .creatorEmail(group.getCreator().getEmail())
-                    .members(new ArrayList<>(uniqueEmails))
+                    .members(memberEmails)
                     .build();
         }).collect(Collectors.toList());
     }
@@ -200,8 +188,47 @@ public class GroupServiceImpl implements GroupService{
                 .members(getGroupMembersEmails(group))
                 .build();
     }
+    @Override
+    public void acceptPendingMember(Integer groupId) {
+        String email = getCurrentAuthenticatedUserEmail();
 
+        PendingGroupMembers pendingMember = pendingGroupMembershipRepository.findByEmailAndGroupId(email, groupId)
+                .orElseThrow(() -> new MemberNotExist("User is not a pending member of this group"));
 
+        // Move to UserGroup
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException("User not registered"));
+
+        UserGroup userGroup = UserGroup.builder()
+                .user(user)
+                .group(pendingMember.getGroup())
+                .userEmail(email)
+                .build();
+        userGroupRepository.save(userGroup);
+
+        pendingGroupMembershipRepository.delete(pendingMember);
+    }
+    @Override
+    public void rejectPendingMember(Integer groupId) {
+        String email = getCurrentAuthenticatedUserEmail();
+        PendingGroupMembers pendingMember = pendingGroupMembershipRepository.findByEmailAndGroupId(email, groupId)
+                .orElseThrow(() -> new MemberNotExist("User is not a pending member of this group"));
+
+        pendingGroupMembershipRepository.delete(pendingMember);
+    }
+
+    @Override
+    public List<PendingGroupMemberResponse> getAllPendingRequest() {
+        String email = getCurrentAuthenticatedUserEmail();
+        List<PendingGroupMembers> pendingRequests = pendingGroupMembershipRepository.findByEmail(email);
+        return pendingRequests.stream()
+                .map(pendingMember -> PendingGroupMemberResponse.builder()
+                        .groupId(pendingMember.getGroup().getId())
+                        .userEmail(pendingMember.getEmail())
+                        .groupName(pendingMember.getGroup().getGroupName())
+                        .creatorEmail(pendingMember.getGroup().getCreator().getEmail())
+                        .build())
+                .collect(Collectors.toList());
+    }
 
    // all helper methods
     private Group validateGroupCreator(Integer groupId) {
@@ -235,17 +262,17 @@ public class GroupServiceImpl implements GroupService{
     }
     private boolean addMemberIfNotExists(Group group, String email, boolean isCreator) {
         User user = userRepository.findByEmail(email).orElse(null);
-        if (user != null) {
-            boolean alreadyMember = userGroupRepository.findByUserIdAndGroupId(user.getId(), group.getId()).isPresent();
-            if (!alreadyMember) {
-                userGroupRepository.save(new UserGroup(null, email, user, group));
-                return true;
-            }
-        } else if (!isCreator) {
-            addPendingMember(group, email);
+        if (isCreator) {
+            userGroupRepository.save(new UserGroup(null, email, user, group));
             return true;
         }
-        return false;
+
+        if (user != null && userGroupRepository.findByUserIdAndGroupId(user.getId(), group.getId()).isPresent()) {
+            return false;
+        }
+
+        addPendingMember(group, email);
+        return true;
     }
     private void addPendingMember(Group group, String email) {
         PendingGroupMembers existingPending = pendingGroupMembershipRepository.findByEmailAndGroup(email, group);
@@ -253,7 +280,6 @@ public class GroupServiceImpl implements GroupService{
             pendingGroupMembershipRepository.save(PendingGroupMembers.builder()
                     .email(email)
                     .group(group)
-                    .status("PENDING")
                     .invitedAt(LocalDateTime.now())
                     .build());
         }
@@ -268,37 +294,18 @@ public class GroupServiceImpl implements GroupService{
     }
 
     private List<Group> getUserGroups(User user) {
-        // Get confirmed member
         List<Group> confirmedGroups = userGroupRepository.findByUserId(user.getId()).stream()
                 .map(UserGroup::getGroup)
                 .collect(Collectors.toList());
 
-        // Get pending member
-        List<Group> pendingGroups = pendingGroupMembershipRepository.findByEmail(user.getEmail()).stream()
-                .map(PendingGroupMembers::getGroup)
-                .collect(Collectors.toList());
-
-        // Combine unique set
-        Set<Group> allGroups = new HashSet<>(confirmedGroups);
-        allGroups.addAll(pendingGroups);
-        return new ArrayList<>(allGroups);
+        Set<Group> allGroups = new HashSet<>(confirmedGroups);return new ArrayList<>(allGroups);
     }
     private List<String> getGroupMembersEmails(Group group) {
-        // Get confirmed member
         List<String> confirmedEmails = group.getUserGroups().stream()
                 .map(userGroup -> userGroup.getUser().getEmail())
                 .collect(Collectors.toList());
 
-        // Get pending member
-        List<String> pendingEmails = pendingGroupMembershipRepository.findByGroupId(group.getId()).stream()
-                .map(PendingGroupMembers::getEmail)
-                .collect(Collectors.toList());
-
-        // Combine unique set
-        Set<String> allEmails = new HashSet<>(confirmedEmails);
-        allEmails.addAll(pendingEmails);
-
-        return new ArrayList<>(allEmails);
+        return confirmedEmails;
     }
     private String getCurrentAuthenticatedUserEmail() {
         // Get authenticated user's details
