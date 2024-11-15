@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -110,8 +111,14 @@ public class UserTransactionController {
 
 
     @GetMapping("/getTransactionsBetweenDate")
-    public ResponseEntity<CustomResponseBody<List<UserTransactionResponse>>> getTransactionsBetweenDate(@RequestBody DateRangeEntity dateRange){
-        try{
+    public ResponseEntity<CustomResponseBody<List<UserTransactionResponse>>> getTransactionsBetweenDate(
+            @RequestParam String fromDate,
+            @RequestParam String toDate) {
+        try {
+            // Create object from parameters
+            DateRangeEntity dateRange = new DateRangeEntity();
+            dateRange.setFromDate(LocalDate.parse(fromDate));
+            dateRange.setToDate(LocalDate.parse(toDate));
 
             CustomResponseBody<List<UserTransactionResponse>> responseBody = new CustomResponseBody<>(
                     CustomResponseBody.Result.SUCCESS,
@@ -131,8 +138,12 @@ public class UserTransactionController {
     }
 
     @GetMapping("/getTransactionsWithCategory")
-    public ResponseEntity<CustomResponseBody<List<UserTransactionResponse>>> getTransactionsWithCategory(@RequestBody UserTransactionRequest request){
-        try{
+    public ResponseEntity<CustomResponseBody<List<UserTransactionResponse>>> getTransactionsWithCategory(
+            @RequestParam Integer categoryId) {
+        try {
+            // Create UserTransactionRequest from the categoryId
+            UserTransactionRequest request = new UserTransactionRequest();
+            request.setCategoryId(categoryId);
 
             CustomResponseBody<List<UserTransactionResponse>> responseBody = new CustomResponseBody<>(
                     CustomResponseBody.Result.SUCCESS,

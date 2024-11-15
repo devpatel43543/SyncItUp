@@ -23,5 +23,7 @@ export const ENDPOINTS = {
     REMOVE_CATEGORY:"/category/deleteCategory",
     PENDING_REQUEST:"/group/pendingRequests",
     ACCEPT_REQUEST:"/group/accept",
-    REJECT_REQUEST:"/group/reject"
+    REJECT_REQUEST:"/group/reject",
+    TRANSACTIONS_BY_DATE: '/user/transaction/getTransactionsBetweenDate',
+    TRANSACTIONS_BY_CATEGORY: '/user/transaction/getTransactionsWithCategory'
 }

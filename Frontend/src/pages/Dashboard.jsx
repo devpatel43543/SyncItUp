@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { PlusIcon, HomeIcon, ChartPieIcon, UsersIcon, Cog6ToothIcon, PencilIcon, TrashIcon,TagIcon } from '@heroicons/react/24/outline';
 import { ENDPOINTS } from '../utils/Constants';
+import Filter from '../components/Filter.jsx';
 import ApiCallingContext from '../context/ApiCallingContext';
 import Navbar from '../components/Navbar';
 import { frontEndRoutes } from '../utils/FrontendRoutes';
@@ -30,6 +31,7 @@ export default function Dashboard() {
             navigate(frontEndRoutes.login)
         }
     },[loggedInUserEmail])
+
     const getAllExpense = async () => {
         try {
             const response = await getRequest(ENDPOINTS.ALL_PERSONAL_EXPENSE, true);
@@ -124,6 +126,11 @@ export default function Dashboard() {
             <main className="max-w-3xl mx-auto py-6 sm:px-6 lg:px-8">
                 <div className="px-4 py-6 sm:px-0">
                     <h1 className="text-3xl font-bold text-gray-900 mb-6">Recent Expenses</h1>
+                    <Filter
+                        categories={categories}
+                        setExpenses={setExpenses}
+                        getAllExpense={getAllExpense}
+                    />
                     <ul className="space-y-4">
                         {expenses.map((expense) => (
                             <li key={expense.txnId} className="py-4 px-4 bg-white shadow-sm rounded-lg mb-4 hover:shadow-md transition-shadow duration-200">
