@@ -76,18 +76,7 @@
             log.info("line 77: {}", otp);
             otpMailBody(otp.getOtp(), user.getEmail());
 
-            List<PendingGroupMembers> pendingGroupMemberships = pendingGroupMembershipRepository.findByEmail(registerRequest.getEmail());
-            for (PendingGroupMembers pendingGroupMembership : pendingGroupMemberships) {
 
-                Group group = pendingGroupMembership.getGroup();
-                UserGroup userGroup = UserGroup.builder()
-                        .user(user)
-                        .group(group)
-                        .userEmail(registerRequest.getEmail())
-                        .build();
-                userGroupRepository.save(userGroup);
-                pendingGroupMembershipRepository.delete(pendingGroupMembership);
-            }
 
             return AuthenticationResponse.builder()
                     .token(null)

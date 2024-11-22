@@ -9,5 +9,6 @@ export const frontEndRoutes = {
     createGroup:"/createGroup",
     groupExpenseDashboard:"/allGroups",
     add_new_member:"/newMember",
-    remove_member:"/removeMember"
+    remove_member:"/removeMember",
+    requests:"/allRequests"
 }

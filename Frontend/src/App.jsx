@@ -19,6 +19,7 @@ const createGroup = React.lazy(()=>import("./pages/CreateGroup.jsx"))
 const groupExpenseDashboard = React.lazy(()=>import("./pages/GroupDashboard.jsx"))
 const AddNewMember = React.lazy(()=>import("./pages/AddNewMember.jsx"))
 const RemoveMember = React.lazy(()=>import("./pages/RemoveMember.jsx"))
+const Requests = React.lazy(()=>import("./pages/Requests.jsx"))
 function App() {
     return (
         <Routes>
@@ -62,6 +63,10 @@ function App() {
             <Route
                 path={`${frontEndRoutes.remove_member}/:groupId`}
                 element={<IncludeNavbar Component={RemoveMember}/>}
+            />
+            <Route
+                path={`${frontEndRoutes.requests}`}
+                element={<IncludeNavbar Component={Requests}/>}
             />
         </Routes>
     );

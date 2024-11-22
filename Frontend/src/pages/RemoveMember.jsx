@@ -14,8 +14,12 @@ function RemoveMember() {
     useEffect(() => {
         const fetchGroupMembers = async () => {
             try {
-                const response = await getRequest(`${ENDPOINTS.INDIVIDUAL_GROUP}?groupId=${groupId}`, true);
-                setMembers(response.data.data.members); // Assuming `members` is a list of emails
+                const response = await getRequest(`${ENDPOINTS.ALL_MEMBERS}?groupId=${groupId}`, true);
+                // setMembers(response.data.data.members); // Assuming `members` is a list of emails
+
+                //
+                const fetchedMembers = response.data?.data?.members || response.data?.data || []; // Safely handle undefined
+                setMembers(Array.isArray(fetchedMembers) ? fetchedMembers : []); 
             } catch (error) {
                 console.error("Error fetching group members:", error);
                 showErrorToast("Failed to fetch group members.");
