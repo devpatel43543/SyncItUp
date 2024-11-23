@@ -143,11 +143,8 @@ public class AuthenticationController {
     @PostMapping("/passwordReset")
     public ResponseEntity<CustomResponseBody<String>> resetPassword(@Valid @RequestBody ResetPasswordRequest resetPasswordRequest) {
         try {
-            String email = resetPasswordRequest.getEmail();
-            String password = resetPasswordRequest.getPassword();
-            String token = resetPasswordRequest.getToken();
 
-            authenticationService.resetPassword(email, password, token);
+            authenticationService.resetPassword(resetPasswordRequest);
 
             HttpStatus status = HttpStatus.OK;
             CustomResponseBody.Result result = CustomResponseBody.Result.SUCCESS;
