@@ -23,14 +23,35 @@ public class ResetTokenServiceImpl implements ResetTokenService{
         // If the user already has a reset token, delete it before creating a new one
         passwordResetTokenRepository.findByUserId(userId).ifPresent(passwordResetTokenRepository::delete);
 
-        PasswordReset passwordReset = PasswordReset.builder()
-                .userId(userId)
-                .token(UUID.randomUUID().toString()) // Generate random token
-                .expiryDate(Instant.now().plusMillis(EXPIRATION_DURATION))
-                .build();
-        log.info(String.valueOf(passwordReset));
+        String token = generateToken();
+        Instant expiryDate = calculateExpiryDate();
+
+        PasswordReset passwordReset = buildPasswordReset(userId, token, expiryDate);
+
+        log.info("Generated Password Reset Token: {}", passwordReset);
+
         return passwordResetTokenRepository.save(passwordReset);
     }
+
+    // Helper method to generate a token
+    private String generateToken() {
+        return UUID.randomUUID().toString();
+    }
+
+    // Helper method to calculate the expiry date
+    private Instant calculateExpiryDate() {
+        return Instant.now().plusMillis(EXPIRATION_DURATION);
+    }
+
+    // Helper method to build PasswordReset object
+    private PasswordReset buildPasswordReset(Integer userId, String token, Instant expiryDate) {
+        return PasswordReset.builder()
+                .userId(userId)
+                .token(token)
+                .expiryDate(expiryDate)
+                .build();
+    }
+
     @Override
     public Optional<PasswordReset> findByUserId(Integer userId) {
         return passwordResetTokenRepository.findByUserId(userId);
