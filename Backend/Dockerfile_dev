@@ -11,7 +11,7 @@ RUN mvn dependency:go-offline
 COPY . .
 
 # Build the Spring Boot application
-RUN mvn package -DskipTests
+RUN mvn package
 
 # Use a lightweight image for running the app
 FROM eclipse-temurin:17
