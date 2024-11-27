@@ -32,6 +32,14 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class UserTransactionServiceImplTest {
 
+    // Constants for magic numbers
+    private static final float DEFAULT_EXPENSE_LUNCH = 100f;
+    private static final float UPDATED_EXPENSE = 300f;
+    private static final float DEFAULT_EXPENSE_GROCERIES = 50f;
+    private static final float TRANSACTION_DATE_RANGE = 5f;
+    private static final float DINNER_EXPENSE = 30f;
+    private static final float MOVIE_EXPENSE = 15f;
+
     @Mock
     private UserTransactionRepository userTransactionRepository;
 
@@ -72,7 +80,7 @@ class UserTransactionServiceImplTest {
         when(categoryService.getCategory(any(CategoryRequest.class))).thenReturn(mockCategory);
 
         UserTransactionRequest request = new UserTransactionRequest();
-        request.setExpense(100f);
+        request.setExpense(DEFAULT_EXPENSE_LUNCH);
         request.setCategoryId(1);
         request.setTxnDesc("Lunch");
         request.setTxnDate(LocalDate.now());
@@ -80,7 +88,7 @@ class UserTransactionServiceImplTest {
         UserTransaction mockTransaction = UserTransaction.builder()
                 .txnId(1)
                 .user(mockUser)
-                .expense(100f)
+                .expense(DEFAULT_EXPENSE_LUNCH)
                 .category(mockCategory)
                 .txnDesc("Lunch")
                 .txnDate(LocalDate.now())
@@ -92,7 +100,7 @@ class UserTransactionServiceImplTest {
 
         assertEquals(1, response.getTxnId());
         assertEquals("Lunch", response.getTxnDesc());
-        assertEquals(100f, response.getExpense());
+        assertEquals(DEFAULT_EXPENSE_LUNCH, response.getExpense());
         assertEquals("Food", response.getCategory());
     }
 
@@ -102,7 +110,7 @@ class UserTransactionServiceImplTest {
         UserTransaction existingTransaction = new UserTransaction();
         existingTransaction.setTxnId(1);
         existingTransaction.setTxnDesc("Old Description");
-        existingTransaction.setExpense(200f);
+        existingTransaction.setExpense(DEFAULT_EXPENSE_GROCERIES);
 
         Category mockCategory = new Category();
         mockCategory.setCategoryId(1);  // Set categoryId
@@ -125,7 +133,7 @@ class UserTransactionServiceImplTest {
 
         UserTransactionRequest request = new UserTransactionRequest();
         request.setTxnId(1);
-        request.setExpense(300f);
+        request.setExpense(UPDATED_EXPENSE);
         request.setTxnDesc("Updated Description");
         request.setCategoryId(1);
 
@@ -136,7 +144,7 @@ class UserTransactionServiceImplTest {
         // Ensure the transaction was updated
         assertEquals(1, response.getTxnId());
         assertEquals("Updated Description", response.getTxnDesc());
-        assertEquals(300f, response.getExpense());
+        assertEquals(UPDATED_EXPENSE, response.getExpense());
         assertEquals("Food", response.getCategory());
     }
 
@@ -150,7 +158,7 @@ class UserTransactionServiceImplTest {
         UserTransaction transaction = new UserTransaction();
         transaction.setTxnId(1);
         transaction.setTxnDesc("Groceries");
-        transaction.setExpense(50f);
+        transaction.setExpense(DEFAULT_EXPENSE_GROCERIES);
         transaction.setTxnDate(LocalDate.now());
         Category category = new Category();
         category.setCategoryName("Food");
@@ -168,7 +176,7 @@ class UserTransactionServiceImplTest {
     void getTransactionsWithinDateRange_ShouldReturnTransactionsInDateRange() {
 
         DateRangeEntity dateRange = new DateRangeEntity();
-        dateRange.setFromDate(LocalDate.now().minusDays(5));
+        dateRange.setFromDate(LocalDate.now().minusDays((long) TRANSACTION_DATE_RANGE));
         dateRange.setToDate(LocalDate.now());
 
         User mockUser = new User();
@@ -178,12 +186,15 @@ class UserTransactionServiceImplTest {
         transaction.setTxnId(1);
         transaction.setTxnDate(LocalDate.now());
         transaction.setTxnDesc("Dinner");
-        transaction.setExpense(30f);
+        transaction.setExpense(DINNER_EXPENSE);
         Category category = new Category();
         category.setCategoryName("Food");
         transaction.setCategory(category);
 
-        when(userTransactionRepository.findByUserAndTxnDateBetween(mockUser, dateRange.getFromDate(), dateRange.getToDate()))
+        // Breaking the long statement into separate variables
+        LocalDate fromDate = dateRange.getFromDate();
+        LocalDate toDate = dateRange.getToDate();
+        when(userTransactionRepository.findByUserAndTxnDateBetween(mockUser, fromDate, toDate))
                 .thenReturn(List.of(transaction));
 
         List<UserTransactionResponse> transactions = userTransactionService.getTransactionsWithinDateRange(dateRange);
@@ -202,7 +213,7 @@ class UserTransactionServiceImplTest {
         UserTransaction transaction = new UserTransaction();
         transaction.setTxnId(1);
         transaction.setTxnDesc("Movie");
-        transaction.setExpense(15f);
+        transaction.setExpense(MOVIE_EXPENSE);
         transaction.setTxnDate(LocalDate.now());
         transaction.setCategory(category);
 
