@@ -167,12 +167,12 @@ const SettleUp = () => {
                                             </div>
                                         </div>
                                     </div>
-                                    <button
-                                        onClick={() => handleSettleUp(debt)}
-                                        className="px-6 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium shadow-sm hover:shadow focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-                                    >
-                                        Settle Up
-                                    </button>
+                                    {/*<button*/}
+                                    {/*    onClick={() => handleSettleUp(debt)}*/}
+                                    {/*    className="px-6 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium shadow-sm hover:shadow focus:ring-2 focus:ring-green-500 focus:ring-offset-2"*/}
+                                    {/*>*/}
+                                    {/*    Settle Up*/}
+                                    {/*</button>*/}
                                 </div>
                             ))}
                         </div>
