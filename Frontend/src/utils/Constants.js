@@ -25,5 +25,15 @@ export const ENDPOINTS = {
     ACCEPT_REQUEST:"/group/accept",
     REJECT_REQUEST:"/group/reject",
     TRANSACTIONS_BY_DATE: '/user/transaction/getTransactionsBetweenDate',
-    TRANSACTIONS_BY_CATEGORY: '/user/transaction/getTransactionsWithCategory'
+    TRANSACTIONS_BY_CATEGORY: '/user/transaction/getTransactionsWithCategory',
+
+    // group transactions
+    GROUP_SUMMARY: '/splitBill/groupSummary',
+    ADD_GROUP_EXPENSE:'/splitBill/addExpense',
+    UPDATE_GROUP_EXPENSE:"/splitBill/updateExpense",
+    DELETE_GROUP_EXPENSE:"/splitBill/deleteExpense",
+    TRANSACTION_SUMMARY_GROUP:"/splitBill/transactionSummary",
+    USER_DEBT_GROUP:"/splitBill/userDebts",
+    SETTLE_DEBT:"/splitBill/settleDebt",
+    DEBIT_CREDIT_SUMMARY:"/splitBill/debitCreditSummary"
 }
