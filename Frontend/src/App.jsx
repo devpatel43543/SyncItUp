@@ -19,11 +19,16 @@ const createGroup = React.lazy(()=>import("./pages/CreateGroup.jsx"))
 const groupExpenseDashboard = React.lazy(()=>import("./pages/GroupDashboard.jsx"))
 const AddNewMember = React.lazy(()=>import("./pages/AddNewMember.jsx"))
 const RemoveMember = React.lazy(()=>import("./pages/RemoveMember.jsx"))
+const GroupDetails = React.lazy(()=>import("./pages/GroupDetails.jsx"))
+const AddExpense = React.lazy(()=>import("./pages/AddExpensePage.jsx"))
+const TransactionSummary = React.lazy(()=>import("./pages/TransactionSummary.jsx"))
+const SettleUp = React.lazy(()=>import("./components/SettleUp.jsx"))
+
 const Requests = React.lazy(()=>import("./pages/Requests.jsx"))
 function App() {
     return (
         <Routes>
-            
+
             <Route
                 path={frontEndRoutes.login}
                 element={<ExcludeNavbar Component={login} />}
@@ -65,8 +70,25 @@ function App() {
                 element={<IncludeNavbar Component={RemoveMember}/>}
             />
             <Route
+                path={`${frontEndRoutes.groupDetails}/:groupId`}
+                element={<IncludeNavbar Component={GroupDetails} />}
+            />
+            <Route
+                path={`${frontEndRoutes.addExpense}/:groupId`}
+                element={<IncludeNavbar Component={AddExpense} />}
+            />
+
+            <Route
+                path={`${frontEndRoutes.transactionSummary}/:groupId`}
+                element={<IncludeNavbar Component={TransactionSummary}/>} />
+            <Route
                 path={`${frontEndRoutes.requests}`}
                 element={<IncludeNavbar Component={Requests}/>}
+            />
+
+            <Route
+                path={`${frontEndRoutes.settleUp}/:groupId`}
+                element={<IncludeNavbar Component={SettleUp}/>}
             />
         </Routes>
     );
