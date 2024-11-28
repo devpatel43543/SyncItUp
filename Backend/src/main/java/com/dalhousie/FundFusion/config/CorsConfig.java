@@ -22,7 +22,7 @@ public class CorsConfig {
         configuration.setAllowedOrigins(
                 List.of(
                         "http://localhost:80",
-                        "http://localhost:81","http://localhost:5173",
+                        "http://localhost:81","http://localhost",
                         "http://csci5308-vm5.research.cs.dal.ca",
                         "http://csci5308-vm5.research.cs.dal.ca:80",
                         "http://csci5308-vm5.research.cs.dal.ca:81"
