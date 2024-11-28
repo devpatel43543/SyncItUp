@@ -21,64 +21,60 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @GetMapping("/getAllCategories")
-    public  ResponseEntity<CustomResponseBody<List<CategoryResponse>>> getAllCategoryForUser(){
-        try{
-            CustomResponseBody<List<CategoryResponse>> responseBody = new CustomResponseBody<>(
-                    CustomResponseBody.Result.SUCCESS,
-                    categoryService.getAllCategories(),
-                    "All categories fetched successfully"
-            );
-            return ResponseEntity.status(HttpStatus.CREATED).body(responseBody);
-        }
-        catch (Exception e){
-            log.error("Unexpected error during transaction: {}",e.getMessage());
-            CustomResponseBody<List<CategoryResponse>> responseBody = new CustomResponseBody<>(
-                    CustomResponseBody.Result.FAILURE,
-                    null,
-                    "Something went wrong");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseBody);
+    public ResponseEntity<CustomResponseBody<List<CategoryResponse>>> getAllCategoryForUser() {
+        try {
+            List<CategoryResponse> categories = categoryService.getAllCategories();
+            HttpStatus status = HttpStatus.CREATED;
+            CustomResponseBody.Result result = CustomResponseBody.Result.SUCCESS;
+            String message = "All categories fetched successfully";
+            return buildResponse(status, result, categories, message);
+        } catch (Exception e) {
+            log.error("Unexpected error during transaction: {}", e.getMessage());
+            HttpStatus status = HttpStatus.BAD_REQUEST;
+            CustomResponseBody.Result result = CustomResponseBody.Result.FAILURE;
+            String message = "Something went wrong";
+            return buildResponse(status, result, null, message);
         }
     }
 
     @PostMapping("/addCategory")
-    public ResponseEntity<CustomResponseBody<CategoryResponse>> addCategory(@RequestBody CategoryRequest request){
-        try{
-            CustomResponseBody<CategoryResponse> responseBody = new CustomResponseBody<>(
-                    CustomResponseBody.Result.SUCCESS,
-                    categoryService.addCategory(request),
-                    "Category added successfully"
-            );
-            return ResponseEntity.status(HttpStatus.CREATED).body(responseBody);
-        }
-        catch (Exception e){
-            log.error("Unexpected error during transaction: {}",e.getMessage());
-            CustomResponseBody<CategoryResponse> responseBody = new CustomResponseBody<>(
-                    CustomResponseBody.Result.FAILURE,
-                    null,
-                    "Something went wrong");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseBody);
+    public ResponseEntity<CustomResponseBody<CategoryResponse>> addCategory(@RequestBody CategoryRequest request) {
+        try {
+            CategoryResponse category = categoryService.addCategory(request);
+            HttpStatus status = HttpStatus.CREATED;
+            CustomResponseBody.Result result = CustomResponseBody.Result.SUCCESS;
+            String message = "Category added successfully";
+            return buildResponse(status, result, category, message);
+        } catch (Exception e) {
+            log.error("Unexpected error during transaction: {}", e.getMessage());
+            HttpStatus status = HttpStatus.BAD_REQUEST;
+            CustomResponseBody.Result result = CustomResponseBody.Result.FAILURE;
+            String message = "Something went wrong";
+            return buildResponse(status, result, null, message);
         }
     }
 
     @DeleteMapping("/deleteCategory")
-    public ResponseEntity<CustomResponseBody<CategoryResponse>> deleteCategory(@RequestParam("id") Integer id){
-        try{
+    public ResponseEntity<CustomResponseBody<CategoryResponse>> deleteCategory(@RequestParam("id") Integer id) {
+        try {
             categoryService.deleteCategory(id);
-            CustomResponseBody<CategoryResponse> responseBody = new CustomResponseBody<>(
-                    CustomResponseBody.Result.SUCCESS,
-                    null,
-                    "Category deleted successfully"
-            );
-            return ResponseEntity.status(HttpStatus.CREATED).body(responseBody);
-        }
-        catch (Exception e){
-            log.error("Unexpected error during transaction: {}",e.getMessage());
-            CustomResponseBody<CategoryResponse> responseBody = new CustomResponseBody<>(
-                    CustomResponseBody.Result.FAILURE,
-                    null,
-                    "Something went wrong");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseBody);
+            HttpStatus status = HttpStatus.CREATED;
+            CustomResponseBody.Result result = CustomResponseBody.Result.SUCCESS;
+            String message = "Category deleted successfully";
+            return buildResponse(status, result, null, message);
+        } catch (Exception e) {
+            log.error("Unexpected error during transaction: {}", e.getMessage());
+            HttpStatus status = HttpStatus.BAD_REQUEST;
+            CustomResponseBody.Result result = CustomResponseBody.Result.FAILURE;
+            String message = "Something went wrong";
+            return buildResponse(status, result, null, message);
         }
     }
 
+    // Helper method to build the response
+    private <T> ResponseEntity<CustomResponseBody<T>> buildResponse(HttpStatus status,
+                                                                    CustomResponseBody.Result result, T data, String message) {
+        CustomResponseBody<T> responseBody = new CustomResponseBody<>(result, data, message);
+        return ResponseEntity.status(status).body(responseBody);
+    }
 }
