@@ -139,7 +139,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public String getURL(HttpServletRequest request) {String siteURL = request.getRequestURL().toString().replace(request.getServletPath(), "");
+    public void handleForgotPassword(HttpServletRequest servletRequest, String email) {
+        String resetUrl = getURL(servletRequest) + "/resetPassword";
+        forgotPassword(email, resetUrl);
+    }
+
+    private String getURL(HttpServletRequest request) {String siteURL = request.getRequestURL().toString().replace(request.getServletPath(), "");
         try {
             java.net.URL oldURL = new java.net.URL(siteURL);
 
@@ -154,8 +159,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             throw new RuntimeException("Failed to construct the correct URL", e);
         }
     }
-    @Override
-    public void forgotPassword(String email, String resetUrl) {
+
+    private void forgotPassword(String email, String resetUrl) {
         User user = getUserByEmail(email);
 
         String resetToken = resetTokenService.createResetPasswordToken(user.getId()).getToken();
@@ -180,7 +185,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     // Helper method to build OTP email content
     private String buildOtpEmailContent(String otp) {
-        return String.format(EmailTemplates.OTP_EMAIL_TEMPLATE,otp);
+        return String.format(EmailTemplates.getOtpEmailTemplate(),otp);
     }
 
 
@@ -193,7 +198,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     // Helper method to build forgot password email content
     private String buildForgotPasswordEmailContent(String resetPasswordLink) {
-        return String.format(EmailTemplates.FORGOT_PASSWORD_EMAIL_TEMPLATE, resetPasswordLink);
+        return String.format(EmailTemplates.getForgotPasswordEmailTemplate(), resetPasswordLink);
     }
 
     @Override

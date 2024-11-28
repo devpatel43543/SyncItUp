@@ -15,6 +15,11 @@ import com.dalhousie.FundFusion.user.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * ApplicationConfig is responsible for configuring core authentication-related beans
+ * including user details, password encoding, and authentication management.
+ * This configuration is vital for handling security in the application and should not be removed.
+ */
 @Configuration
 @RequiredArgsConstructor
 public class ApplicationConfig {

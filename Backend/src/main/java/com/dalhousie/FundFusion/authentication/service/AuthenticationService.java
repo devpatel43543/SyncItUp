@@ -11,9 +11,8 @@ public interface AuthenticationService {
     AuthenticationResponse registerUser(RegisterRequest registerRequest);
 
     AuthenticationResponse authenticateUser(AuthenticateRequest authenticateRequest);
-    String getURL(HttpServletRequest request);
-    void forgotPassword(String email, String resetUrl);
-    void resetPassword(ResetPasswordRequest resetPasswordRequest);
+      void resetPassword(ResetPasswordRequest resetPasswordRequest);
     AuthenticationResponse verifyOtp(OtpVarificationRequest otpVarificationRequest);
     void resendOtp();
+    void handleForgotPassword(HttpServletRequest servletRequest, String email);
     }

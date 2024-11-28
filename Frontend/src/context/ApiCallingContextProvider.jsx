@@ -1,11 +1,11 @@
 import React, { useContext, useEffect } from "react";
 import ApiCallingContext from "./ApiCallingContext";
-import { AUTH_TOKEN } from "../utils/Constants";
+import { AUTH_TOKEN, BASE_URL } from "../utils/Constants";
 import axios from "axios";
 import { data } from "autoprefixer";
 //import AuthContext from "./AuthContext";
 
-const BASE_URL = import.meta.env.VITE_BASE_URL
+//const BASE_URL = import.meta.env.VITE_BASE_URL
 console.log("Base URL: "+BASE_URL)
 const ApiCallingContextProvider = (props) => {
 

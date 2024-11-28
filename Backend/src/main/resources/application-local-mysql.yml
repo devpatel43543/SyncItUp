@@ -10,7 +10,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:
@@ -20,7 +20,7 @@ logging:
     org:
       springframework: DEBUG
 frontend:
-  port: 80
+  port: 5173
 
 # Instructions for testing in a local environment:
 # 1. Create a database named 'fundfusion' in your MySQL server.

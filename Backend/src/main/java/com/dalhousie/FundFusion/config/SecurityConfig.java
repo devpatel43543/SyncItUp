@@ -13,6 +13,11 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * SecurityConfig class provides essential security configurations for the application.
+ * It defines HTTP security settings, manages stateless sessions, and integrates JWT filters.
+ * This configuration is crucial for the security framework and should not be removed.
+ */
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -23,7 +28,7 @@ public class SecurityConfig {
     private final AuthenticationProvider authenticationProvider;
 
     @Bean
-    @Profile("!local")
+
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable) // Disable CSRF for stateless APIs
                 .authorizeHttpRequests(req -> req
@@ -37,12 +42,12 @@ public class SecurityConfig {
         return http.build();
     }
 
-    @Bean
-    public SecurityFilterChain securityFilterChainLocal(HttpSecurity http) throws Exception {
-        http.csrf(AbstractHttpConfigurer::disable)
-                .headers(header -> header.frameOptions(frameOption -> frameOption.sameOrigin()))
-                .authorizeHttpRequests(request -> request.anyRequest().permitAll());
-
-        return http.build();
-    }
+//    @Bean
+//    public SecurityFilterChain securityFilterChainLocal(HttpSecurity http) throws Exception {
+//        http.csrf(AbstractHttpConfigurer::disable)
+//                .headers(header -> header.frameOptions(frameOption -> frameOption.sameOrigin()))
+//                .authorizeHttpRequests(request -> request.anyRequest().permitAll());
+//
+//        return http.build();
+//    }
 }
