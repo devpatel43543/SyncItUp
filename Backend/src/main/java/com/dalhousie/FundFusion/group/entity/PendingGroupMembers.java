@@ -33,25 +33,6 @@ public class PendingGroupMembers {
     @Column(nullable = false)
     private LocalDateTime invitedAt = LocalDateTime.now();
 
-    public void validate() {
-        if (isInvalidEmail(email)) {
-            throw new IllegalArgumentException("Invalid email address.");
-        }
-        if (group == null) {
-            throw new IllegalArgumentException("Group must be specified.");
-        }
-    }
 
-    private boolean isInvalidEmail(String email) {
-        return isNullOrBlank(email) || isInvalidFormat(email);
-    }
-
-    private boolean isInvalidFormat(String email) {
-        return !email.contains("@");
-    }
-
-    private boolean isNullOrBlank(String value) {
-        return value == null || value.isBlank();
-    }
 
 }

@@ -32,33 +32,6 @@ public class Group  {
 
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
     private List<UserGroup> userGroups;
-    /**
-     * Validates the group fields.
-     *
-     * @throws IllegalArgumentException if any field is invalid.
-     */
-    public void validate() {
-        if (isInvalidGroupName(groupName)) {
-            throw new IllegalArgumentException("Group name cannot be null or empty.");
-        }
-        if (isInvalidDescription(description)) {
-            throw new IllegalArgumentException("Description cannot be null or empty.");
-        }
-        if (creator == null) {
-            throw new IllegalArgumentException("Group creator must be specified.");
-        }
-    }
 
-    private boolean isInvalidGroupName(String groupName) {
-        return isNullOrBlank(groupName);
-    }
-
-    private boolean isInvalidDescription(String description) {
-        return isNullOrBlank(description);
-    }
-
-    private boolean isNullOrBlank(String value) {
-        return value == null || value.isBlank();
-    }
 
 }
