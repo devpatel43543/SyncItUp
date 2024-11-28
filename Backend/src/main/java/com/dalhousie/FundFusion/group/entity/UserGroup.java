@@ -26,4 +26,29 @@ public class UserGroup {
     @ManyToOne
     @JoinColumn(name = "group_id", nullable = false)
     private Group group;
+
+    public void validate() {
+        if (isInvalidEmail(userEmail)) {
+            throw new IllegalArgumentException("Invalid user email address.");
+        }
+        if (user == null) {
+            throw new IllegalArgumentException("User must be specified.");
+        }
+        if (group == null) {
+            throw new IllegalArgumentException("Group must be specified.");
+        }
+    }
+
+    private boolean isInvalidEmail(String email) {
+        return isNullOrBlank(email) || isInvalidFormat(email);
+    }
+
+    private boolean isInvalidFormat(String email) {
+        return !email.contains("@");
+    }
+
+    private boolean isNullOrBlank(String value) {
+        return value == null || value.isBlank();
+    }
+
 }
