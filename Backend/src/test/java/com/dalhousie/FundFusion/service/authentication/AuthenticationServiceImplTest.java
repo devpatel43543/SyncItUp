@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import com.dalhousie.FundFusion.authentication.entity.Otp;
+import com.dalhousie.FundFusion.authentication.entity.PasswordReset;
 import com.dalhousie.FundFusion.authentication.requestEntity.OtpVarificationRequest;
 import com.dalhousie.FundFusion.authentication.service.AuthenticationServiceImpl;
 import com.dalhousie.FundFusion.authentication.service.OtpService;
@@ -11,6 +12,7 @@ import com.dalhousie.FundFusion.exception.TokenExpiredException;
 import com.dalhousie.FundFusion.authentication.requestEntity.AuthenticateRequest;
 import com.dalhousie.FundFusion.authentication.requestEntity.RegisterRequest;
 import com.dalhousie.FundFusion.authentication.responseEntity.AuthenticationResponse;
+import com.dalhousie.FundFusion.exception.TokenInvalidExaption;
 import com.dalhousie.FundFusion.group.repository.PendingGroupMembersRepository;
 import com.dalhousie.FundFusion.jwt.JwtService;
 import com.dalhousie.FundFusion.user.entity.User;
@@ -18,6 +20,7 @@ import com.dalhousie.FundFusion.user.repository.UserRepository;
 
 import jakarta.mail.internet.MimeMessage;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -221,5 +224,106 @@ class AuthenticationServiceImplTest {
 
         AuthenticationResponse response = authenticationService.authenticateUser(request);
         assertNotNull(response.getToken(),"The token should be 'invalidToken'");
+    }
+
+    @Test
+    void shouldThrowException_whenRegisterRequestIsNull() {
+        assertThrows(NullPointerException.class, () -> authenticationService.registerUser(null));
+    }
+
+    @Test
+    void shouldThrowException_whenAuthenticateRequestIsNull() {
+        assertThrows(NullPointerException.class, () -> authenticationService.authenticateUser(null));
+    }
+
+    @Test
+    void shouldThrowException_whenOtpIsNull() {
+        assertThrows(Throwable.class, () -> authenticationService.verifyOtp(null));
+    }
+
+    @Test
+    void shouldMarkUserAsVerified_whenOtpIsValid() {
+        Otp otp = new Otp();
+        otp.setUserId(1);
+
+        User user = new User();
+        user.setId(1);
+        user.setEmailVerified(false);
+
+        when(otpService.findByOtp("123456")).thenReturn(Optional.of(otp));
+        when(userRepository.findById(1)).thenReturn(Optional.of(user));
+        when(otpService.isOtpValid(otp)).thenReturn(true);
+        when(jwtService.generateToken(user, true)).thenReturn("jwtToken");
+
+        AuthenticationResponse response = authenticationService.verifyOtp(new OtpVarificationRequest("123456"));
+
+        assertEquals("jwtToken", response.getToken());
+        assertTrue(user.isEmailVerified());
+        verify(userRepository, times(1)).save(user);
+    }
+
+    @Test
+    void shouldSendMail_whenOtpGenerated() throws Exception {
+        RegisterRequest registerRequest = new RegisterRequest("John Doe", "johndoe@example.com", "password");
+
+        when(userRepository.findByEmail(registerRequest.getEmail())).thenReturn(Optional.empty());
+        when(passwordEncoder.encode(registerRequest.getPassword())).thenReturn("encodedPassword");
+
+        doAnswer(invocation -> {
+            User user = invocation.getArgument(0);
+            user.setId(1);
+            return user;
+        }).when(userRepository).save(any(User.class));
+
+        Otp otp = new Otp();
+        otp.setOtp("123456");
+        when(otpService.generateOtp(1)).thenReturn(otp);
+
+        MimeMessage mimeMessage = mock(MimeMessage.class);
+        when(javaMailSender.createMimeMessage()).thenReturn(mimeMessage);
+
+        authenticationService.registerUser(registerRequest);
+
+        verify(javaMailSender, times(1)).send(mimeMessage);
+    }
+
+    @Test
+    void shouldThrowException_whenForgotPasswordEmailIsNull() {
+        assertThrows(Throwable.class, () -> authenticationService.forgotPassword(null, "http://example.com/reset"));
+    }
+
+    @Test
+    void shouldReturnUrlWithPort_whenHostIsLocalhost() {
+        HttpServletRequest mockRequest = mock(HttpServletRequest.class);
+
+        when(mockRequest.getRequestURL()).thenReturn(new StringBuffer("http://localhost/api/check"));
+        when(mockRequest.getServletPath()).thenReturn("/api/check");
+
+        String result = authenticationService.getURL(mockRequest);
+
+        assertEquals("http://localhost:80", result);
+    }
+
+    @Test
+    void shouldReturnUrlWithoutPort_whenHostIsNotLocalhost() {
+        HttpServletRequest mockRequest = mock(HttpServletRequest.class);
+
+        when(mockRequest.getRequestURL()).thenReturn(new StringBuffer("http://example.com/api/check"));
+        when(mockRequest.getServletPath()).thenReturn("/api/check");
+
+        String result = authenticationService.getURL(mockRequest);
+
+        assertEquals("http://example.com", result);
+    }
+
+    @Test
+    void shouldThrowRuntimeException_whenUrlIsMalformed() {
+        HttpServletRequest mockRequest = mock(HttpServletRequest.class);
+
+        when(mockRequest.getRequestURL()).thenReturn(new StringBuffer("malformed-url"));
+        when(mockRequest.getServletPath()).thenReturn("/api/check");
+
+        Exception exception = assertThrows(RuntimeException.class, () -> authenticationService.getURL(mockRequest));
+        assertTrue(exception.getMessage().contains("Failed to construct the correct URL"));
     }
 }
