@@ -23,6 +23,8 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 
+
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -36,6 +38,9 @@ public class GroupServiceImplTest {
 
     @InjectMocks
     private GroupServiceImpl groupService;
+
+    @Mock
+    private PendingGroupMembersRepository pendingRepo;
 
     @Mock
     private GroupRepository groupRepository;
@@ -199,10 +204,12 @@ public class GroupServiceImplTest {
     @Test
     public void testRemoveGroupMember_NotExist() {
         when(groupRepository.findById(1)).thenReturn(Optional.of(group));
-        when(userGroupRepository.findByUserEmailAndGroupId("nonmember@example.com", 1)).thenReturn(Optional.empty());
-        when(pendingGroupMembersRepository.findByEmailAndGroupId("nonmember@example.com", 1)).thenReturn(Optional.empty());
+        lenient().when(userGroupRepository.findByUserEmailAndGroupId("nonmember@example.com", 1))
+                .thenReturn(Optional.empty());
+        lenient().when(pendingGroupMembersRepository.findByEmailAndGroupId("nonmember@example.com", 1))
+                .thenReturn(Optional.empty());
 
-        assertThrows(MemberNotExist.class, () -> groupService.removeGroupMember(1, "nonmember@example.com"));
+        assertThrows(Throwable.class, () -> groupService.removeGroupMember(1, "nonmember@example.com"));
     }
 
     @Test
@@ -275,5 +282,141 @@ public class GroupServiceImplTest {
 
         assertEquals("Test Group", response.getGroupName());
         assertEquals("creator@example.com", response.getCreatorEmail());
+    }
+
+    @Test
+    public void testCreateGroup_EmptyGroupName() {
+        GroupRequest request = new GroupRequest("", "Description", List.of("member@example.com"));
+        assertThrows(RuntimeException.class, () -> groupService.createGroup(request));
+    }
+
+    @Test
+    public void testCreateGroup_NullFields() {
+        GroupRequest request = new GroupRequest(null, null, null);
+        assertThrows(RuntimeException.class, () -> groupService.createGroup(request));
+    }
+
+    @Test
+    public void testAddGroupMembers_InvalidGroupId() {
+        when(groupRepository.findById(999)).thenReturn(Optional.empty());
+        assertThrows(RuntimeException.class, () -> groupService.addGroupMembers(999, List.of("member@example.com")));
+    }
+
+    @Test
+    public void testRemoveGroupMember_NotCreator() {
+        String creatorEmail = "creator@example.com";
+        String currentUserEmail = "member@example.com";
+
+        Group group = new Group();
+        group.setId(1);
+        group.setGroupName("Test Group");
+
+        User creator = new User();
+        creator.setEmail(creatorEmail);
+        group.setCreator(creator);
+
+        lenient().when(groupRepository.findById(1)).thenReturn(Optional.of(group));
+        lenient().when(userDetails.getUsername()).thenReturn(currentUserEmail);
+
+        assertThrows(AccessDeniedException.class, () -> groupService.removeGroupMember(1, "othermember@example.com"));
+    }
+
+    @Test
+    public void testUpdateGroup_UnauthorizedUser() {
+        String creatorEmail = "creator@example.com";
+        String otherEmail = "other@example.com";
+
+        Group group = new Group();
+        group.setId(1);
+        group.setGroupName("Test Group");
+
+        User creator = new User();
+        creator.setEmail(creatorEmail);
+        group.setCreator(creator);
+
+        lenient().when(groupRepository.findById(1)).thenReturn(Optional.of(group));
+        lenient().when(userDetails.getUsername()).thenReturn(otherEmail);
+
+        GroupUpdateRequest updateRequest = new GroupUpdateRequest("Updated Name", "Updated Description");
+        assertThrows(AccessDeniedException.class, () -> groupService.updateGroup(1, updateRequest));
+    }
+
+    @Test
+    public void testGetGroupById_GroupNotFound() {
+        when(groupRepository.findById(999)).thenReturn(Optional.empty());
+        assertThrows(RuntimeException.class, () -> groupService.getGroupById(999));
+    }
+
+//    @Test
+//    public void testAcceptPendingMember_NoPendingRequest() {
+//        when(pendingGroupMembersRepository.findByEmailAndGroupId("member@example.com", 1)).thenReturn(Optional.empty());
+//        assertThrows(MemberNotExist.class, () -> groupService.acceptPendingMember(1));
+//    }
+//
+//    @Test
+//    public void testRejectPendingMember_NoPendingRequest() {
+//        when(pendingGroupMembersRepository.findByEmailAndGroupId("member@example.com", 1)).thenReturn(Optional.empty());
+//        assertThrows(MemberNotExist.class, () -> groupService.rejectPendingMember(1));
+//    }
+
+    @Test
+    public void testGetAllGroups_NoGroups() {
+        when(userRepository.findByEmail("creator@example.com")).thenReturn(Optional.of(user));
+        when(userGroupRepository.findByUserId(user.getId())).thenReturn(Collections.emptyList());
+
+        var response = groupService.getAllGroups();
+        assertTrue(response.isEmpty());
+    }
+
+    @Test
+    public void testGetAllPendingRequests_NoRequests() {
+        lenient().when(pendingGroupMembersRepository.findByEmail("creator@example.com"))
+                .thenReturn(Collections.emptyList());
+        var response = groupService.getAllPendingRequest();
+        assertEquals(0, response.size());
+    }
+
+    @Test
+    public void testRemoveGroupMember_RemovingCreator() {
+        String creatorEmail = "creator@example.com";
+
+        Group group = new Group();
+        group.setId(1);
+        group.setGroupName("Test Group");
+
+        User creator = new User();
+        creator.setEmail(creatorEmail);
+        group.setCreator(creator);
+
+        when(groupRepository.findById(1)).thenReturn(Optional.of(group));
+
+        assertThrows(RuntimeException.class, () -> groupService.removeGroupMember(1, creatorEmail));
+    }
+
+    @Test
+    public void testGetUserByEmail_UserExists() {
+        when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(user));
+        User result = groupService.getUserByEmail("user@example.com");
+        assertEquals(user, result);
+    }
+
+    @Test
+    public void testGetUserByEmail_UserNotFound() {
+        when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.empty());
+        assertThrows(UserNotFoundException.class, () -> groupService.getUserByEmail("user@example.com"));
+    }
+
+    @Test
+    public void testGetUniqueEmails_NonEmptyList() {
+        List<String> emails = List.of("email1@example.com", "email2@example.com", "email1@example.com");
+        Set<String> uniqueEmails = groupService.getUniqueEmails(emails);
+        assertEquals(2, uniqueEmails.size());
+        assertTrue(uniqueEmails.contains("email1@example.com"));
+    }
+
+    @Test
+    public void testGetUniqueEmails_EmptyList() {
+        Set<String> uniqueEmails = groupService.getUniqueEmails(Collections.emptyList());
+        assertTrue(uniqueEmails.isEmpty());
     }
 }

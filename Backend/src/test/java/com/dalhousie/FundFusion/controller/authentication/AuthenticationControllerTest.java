@@ -1,22 +1,32 @@
 package com.dalhousie.FundFusion.controller.authentication;
 
 import com.dalhousie.FundFusion.authentication.controller.AuthenticationController;
+import com.dalhousie.FundFusion.authentication.entity.PasswordReset;
+import com.dalhousie.FundFusion.authentication.repository.PasswordResetTokenRepository;
 import com.dalhousie.FundFusion.authentication.requestEntity.*;
 import com.dalhousie.FundFusion.authentication.responseEntity.AuthenticationResponse;
 import com.dalhousie.FundFusion.authentication.service.AuthenticationService;
+import com.dalhousie.FundFusion.authentication.service.ResetTokenService;
 import com.dalhousie.FundFusion.exception.TokenExpiredException;
 import com.dalhousie.FundFusion.exception.UserNotFoundException;
+import com.dalhousie.FundFusion.user.entity.User;
+import com.dalhousie.FundFusion.user.repository.UserRepository;
 import com.dalhousie.FundFusion.util.CustomResponseBody;
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.Instant;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class AuthenticationControllerTest {
 
@@ -178,27 +188,27 @@ public class AuthenticationControllerTest {
         Assertions.assertNull(response.getBody().data());
     }
 
-    @Test
-    void testForgotPassword_UserNotFound() {
-
-        AuthenticationService mockService = Mockito.mock(AuthenticationService.class);
-
-        Mockito.doThrow(new UserNotFoundException("User not found"))
-                .when(mockService)
-                .forgotPassword(Mockito.eq("unknown@example.com"), Mockito.anyString());
-
-        AuthenticationController controller = new AuthenticationController(mockService);
-
-        ForgotPasswordRequest request = new ForgotPasswordRequest();
-        request.setEmail("unknown@example.com");
-
-        ResponseEntity<CustomResponseBody<String>> response = controller.forgotPassword(null, request);
-
-        Assertions.assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        Assertions.assertEquals("FAILURE", response.getBody().result().name());
-        Assertions.assertEquals("User not found", response.getBody().message());
-        Assertions.assertNull(response.getBody().data());
-    }
+//    @Test
+//    void testForgotPassword_UserNotFound() {
+//
+//        AuthenticationService mockService = Mockito.mock(AuthenticationService.class);
+//
+//        Mockito.doThrow(new UserNotFoundException("User not found"))
+//                .when(mockService);
+////                .forgotPassword(Mockito.eq("unknown@example.com"), Mockito.anyString());
+//
+//        AuthenticationController controller = new AuthenticationController(mockService);
+//
+//        ForgotPasswordRequest request = new ForgotPasswordRequest();
+//        request.setEmail("unknown@example.com");
+//
+//        ResponseEntity<CustomResponseBody<String>> response = controller.forgotPassword(null, request);
+//
+//        Assertions.assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+//        Assertions.assertEquals("FAILURE", response.getBody().result().name());
+//        Assertions.assertEquals("User not found", response.getBody().message());
+//        Assertions.assertNull(response.getBody().data());
+//    }
 
     @Test
     void testVerifyOtp_InvalidOtp() {
@@ -331,6 +341,70 @@ public class AuthenticationControllerTest {
 
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
         Mockito.verify(mockService).authenticateUser(Mockito.any(AuthenticateRequest.class));
+    }
+
+    @Test
+    void testForgotPassword_Success() {
+        AuthenticationService mockService = Mockito.mock(AuthenticationService.class);
+        AuthenticationController controller = new AuthenticationController(mockService);
+
+        ForgotPasswordRequest request = new ForgotPasswordRequest();
+        request.setEmail("user@example.com");
+
+        HttpServletRequest servletRequest = Mockito.mock(HttpServletRequest.class);
+
+        ResponseEntity<CustomResponseBody<String>> response = controller.forgotPassword(servletRequest, request);
+
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+        Assertions.assertEquals("SUCCESS", response.getBody().result().name());
+        Assertions.assertEquals("Reset link sent successfully", response.getBody().message());
+        Assertions.assertNull(response.getBody().data());
+    }
+
+    @Test
+    void testForgotPassword_UserNotFound() {
+        AuthenticationService mockService = Mockito.mock(AuthenticationService.class);
+
+        Mockito.doThrow(new UserNotFoundException("User not found"))
+                .when(mockService)
+                .handleForgotPassword(Mockito.any(HttpServletRequest.class), Mockito.anyString());
+
+        AuthenticationController controller = new AuthenticationController(mockService);
+
+        ForgotPasswordRequest request = new ForgotPasswordRequest();
+        request.setEmail("nonexistentuser@example.com");
+
+        HttpServletRequest servletRequest = Mockito.mock(HttpServletRequest.class);
+
+        ResponseEntity<CustomResponseBody<String>> response = controller.forgotPassword(servletRequest, request);
+
+        Assertions.assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        Assertions.assertEquals("FAILURE", response.getBody().result().name());
+        Assertions.assertEquals("User not found", response.getBody().message());
+        Assertions.assertNull(response.getBody().data());
+    }
+
+    @Test
+    void testForgotPassword_UnexpectedError() {
+        AuthenticationService mockService = Mockito.mock(AuthenticationService.class);
+
+        Mockito.doThrow(new RuntimeException("Unexpected error"))
+                .when(mockService)
+                .handleForgotPassword(Mockito.any(HttpServletRequest.class), Mockito.anyString());
+
+        AuthenticationController controller = new AuthenticationController(mockService);
+
+        ForgotPasswordRequest request = new ForgotPasswordRequest();
+        request.setEmail("user@example.com");
+
+        HttpServletRequest servletRequest = Mockito.mock(HttpServletRequest.class);
+
+        ResponseEntity<CustomResponseBody<String>> response = controller.forgotPassword(servletRequest, request);
+
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        Assertions.assertEquals("FAILURE", response.getBody().result().name());
+        Assertions.assertEquals("Something went wrong", response.getBody().message());
+        Assertions.assertNull(response.getBody().data());
     }
 }
 

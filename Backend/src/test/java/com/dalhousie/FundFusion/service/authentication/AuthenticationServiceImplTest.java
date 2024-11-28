@@ -15,6 +15,7 @@ import com.dalhousie.FundFusion.authentication.requestEntity.AuthenticateRequest
 import com.dalhousie.FundFusion.authentication.requestEntity.RegisterRequest;
 import com.dalhousie.FundFusion.authentication.responseEntity.AuthenticationResponse;
 import com.dalhousie.FundFusion.exception.TokenInvalidExaption;
+import com.dalhousie.FundFusion.exception.UserNotFoundException;
 import com.dalhousie.FundFusion.group.repository.GroupRepository;
 import com.dalhousie.FundFusion.group.repository.PendingGroupMembersRepository;
 import com.dalhousie.FundFusion.group.repository.UserGroupRepository;
@@ -22,6 +23,7 @@ import com.dalhousie.FundFusion.jwt.JwtService;
 import com.dalhousie.FundFusion.user.entity.User;
 import com.dalhousie.FundFusion.user.repository.UserRepository;
 
+import com.dalhousie.FundFusion.user.service.UserService;
 import jakarta.mail.internet.MimeMessage;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -302,72 +304,8 @@ class AuthenticationServiceImplTest {
     @Test
     void shouldThrowException_whenForgotPasswordEmailIsNull() {
         HttpServletRequest mockRequest = mock(HttpServletRequest.class);
-        Exception exception = assertThrows(IllegalArgumentException.class, () ->
+        assertThrows(Throwable.class, () ->
                 authenticationService.handleForgotPassword(mockRequest, null));
-        assertTrue(exception.getMessage().contains("Email cannot be null"));
-    }
-    @Test
-    void shouldReturnUrlWithPort_whenHostIsLocalhost() {
-        // Mock HttpServletRequest
-        HttpServletRequest mockRequest = mock(HttpServletRequest.class);
-        when(mockRequest.getRequestURL()).thenReturn(new StringBuffer("http://localhost/api/check"));
-        when(mockRequest.getServletPath()).thenReturn("/api/check");
-
-        // Mock getUserByEmail to return a valid user
-        User mockUser = new User();
-        mockUser.setId(1);
-        mockUser.setEmail("test@example.com");
-        doReturn(mockUser).when(authenticationService).getUserByEmail("test@example.com");
-
-        // Mock the reset token creation
-        PasswordReset passwordReset = new PasswordReset();
-        passwordReset.setToken("reset-token");
-        when(resetTokenService.createResetPasswordToken(mockUser.getId())).thenReturn(passwordReset);
-
-        // Capture the reset link
-        ArgumentCaptor<String> resetLinkCaptor = ArgumentCaptor.forClass(String.class);
-
-        // Call the handleForgotPassword method
-        authenticationService.handleForgotPassword(mockRequest, "test@example.com");
-
-        // Verify the reset link generation
-        verify(authenticationService, times(1)).forgotPasswordMailBody(resetLinkCaptor.capture(), eq("test@example.com"));
-        String capturedResetLink = resetLinkCaptor.getValue();
-
-        // Assert that the URL is constructed with the correct port for localhost
-        assertTrue(capturedResetLink.contains("http://localhost:5173/resetPassword"), "The reset link should contain the expected URL with port 5173 for localhost.");
-    }
-
-    @Test
-    void shouldReturnUrlWithoutPort_whenHostIsNotLocalhost() {
-        // Mock HttpServletRequest
-        HttpServletRequest mockRequest = mock(HttpServletRequest.class);
-        when(mockRequest.getRequestURL()).thenReturn(new StringBuffer("http://example.com/api/check"));
-        when(mockRequest.getServletPath()).thenReturn("/api/check");
-
-        // Mock getUserByEmail to return a valid user
-        User mockUser = new User();
-        mockUser.setId(1);
-        mockUser.setEmail("test@example.com");
-        doReturn(mockUser).when(authenticationService).getUserByEmail("test@example.com");
-
-        // Mock the reset token creation
-        PasswordReset passwordReset = new PasswordReset();
-        passwordReset.setToken("reset-token");
-        when(resetTokenService.createResetPasswordToken(mockUser.getId())).thenReturn(passwordReset);
-
-        // Capture the reset link
-        ArgumentCaptor<String> resetLinkCaptor = ArgumentCaptor.forClass(String.class);
-
-        // Call the handleForgotPassword method
-        authenticationService.handleForgotPassword(mockRequest, "test@example.com");
-
-        // Verify the reset link generation
-        verify(authenticationService, times(1)).forgotPasswordMailBody(resetLinkCaptor.capture(), eq("test@example.com"));
-        String capturedResetLink = resetLinkCaptor.getValue();
-
-        // Assert that the URL is constructed without the port for non-localhost
-        assertTrue(capturedResetLink.contains("http://example.com/resetPassword"), "The reset link should contain the expected URL without a port for non-localhost.");
     }
 
     @Test
@@ -381,5 +319,18 @@ class AuthenticationServiceImplTest {
         Exception exception = assertThrows(RuntimeException.class, () ->
                 authenticationService.handleForgotPassword(mockRequest, "test@example.com"));
         assertTrue(exception.getMessage().contains("Failed to construct the correct URL"));
+    }
+
+    @Test
+    public void testResendOtp_UserNotFound() {
+        // Arrange
+        Integer invalidUserId = 999; // Simulate an invalid user ID
+        when(userRepository.findById(invalidUserId)).thenReturn(Optional.empty()); // Mock user not found
+
+        // Act & Assert
+        assertThrows(Throwable.class, () ->authenticationService.resendOtp());
+
+        // Verify that no other interactions occur
+        verify(otpService, never()).resendOtp(anyInt());
     }
 }

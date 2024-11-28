@@ -6,6 +6,10 @@ import com.dalhousie.FundFusion.category.requestEntity.CategoryRequest;
 import com.dalhousie.FundFusion.category.responseEntity.CategoryResponse;
 import com.dalhousie.FundFusion.category.service.CategoryServiceImpl;
 import com.dalhousie.FundFusion.exception.CategoryNotFoundException;
+import com.dalhousie.FundFusion.group.entity.Group;
+import com.dalhousie.FundFusion.group.entity.PendingGroupMembers;
+import com.dalhousie.FundFusion.group.repository.PendingGroupMembersRepository;
+import com.dalhousie.FundFusion.group.service.GroupService;
 import com.dalhousie.FundFusion.user.entity.User;
 import com.dalhousie.FundFusion.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,6 +31,12 @@ class CategoryServiceImplTest {
 
     @Mock
     private CategoryRepository categoryRepository;
+
+    @Mock
+    private GroupService groupService;
+
+    @Mock
+    private PendingGroupMembersRepository pendingRepo;
 
     @Mock
     private UserService userService;
@@ -170,5 +180,25 @@ class CategoryServiceImplTest {
         when(categoryRepository.findByCategoryIdAndUser(USER_CATEGORY_ID, mockUser)).thenReturn(Optional.empty());
 
         assertThrows(CategoryNotFoundException.class, () -> categoryService.deleteCategory(USER_CATEGORY_ID));
+    }
+
+    @Test
+    void testRejectPendingMember_Success() {
+
+        String authenticatedEmail = "user@example.com";
+        Integer groupId = 1;
+
+        Group mockGroup = new Group();
+        mockGroup.setId(groupId);
+
+        PendingGroupMembers mockPendingMember = PendingGroupMembers.builder()
+                .id(1)
+                .email(authenticatedEmail)
+                .group(mockGroup)
+                .build();
+
+        lenient().doNothing().when(pendingRepo).delete(mockPendingMember);
+
+        groupService.rejectPendingMember(groupId);
     }
 }

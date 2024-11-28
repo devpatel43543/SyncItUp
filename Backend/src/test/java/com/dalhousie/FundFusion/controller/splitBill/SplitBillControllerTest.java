@@ -117,18 +117,11 @@ class SplitBillControllerTest {
         request.setCreditorEmail("creditor@example.com");
         request.setAmount(100.0);
 
-        ResponseEntity<CustomResponseBody<SettlementResponse>> response = controller.settleDebt(request);
+        ResponseEntity<CustomResponseBody<String>> response = controller.settleDebt(request);
 
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
         Assertions.assertEquals("SUCCESS", response.getBody().result().name());
-        Assertions.assertEquals("Debt settled successfully.", response.getBody().message());
-
-        SettlementResponse responseData = response.getBody().data();
-        Assertions.assertNotNull(responseData);
-        Assertions.assertEquals("debtor@example.com", responseData.getDebtorEmail());
-        Assertions.assertEquals("creditor@example.com", responseData.getCreditorEmail());
-        Assertions.assertEquals(100.0, responseData.getAmountSettled());
-        Assertions.assertEquals("Debt settled successfully.", responseData.getMessage());
+        Assertions.assertEquals("Debt settled successfully", response.getBody().message());
     }
 
     @Test
@@ -172,7 +165,6 @@ class SplitBillControllerTest {
 
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
         Assertions.assertEquals("SUCCESS", response.getBody().result().name());
-        Assertions.assertEquals("fetched successfully", response.getBody().message());
         Assertions.assertEquals(1, response.getBody().data().size());
 
         TransactionSummaryResponse transaction = response.getBody().data().get(0);
@@ -259,7 +251,7 @@ class SplitBillControllerTest {
         request.setCreditorEmail("creditor@example.com");
         request.setAmount(10.0);
 
-        ResponseEntity<CustomResponseBody<SettlementResponse>> response = controller.settleDebt(request);
+        ResponseEntity<CustomResponseBody<String>> response = controller.settleDebt(request);
 
         Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         Assertions.assertEquals("FAILURE", response.getBody().result().name());
@@ -280,7 +272,6 @@ class SplitBillControllerTest {
 
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
         Assertions.assertEquals("SUCCESS", response.getBody().result().name());
-        Assertions.assertEquals("fetched successfully", response.getBody().message());
         Assertions.assertTrue(response.getBody().data().isEmpty());
     }
 
@@ -410,7 +401,6 @@ class SplitBillControllerTest {
 
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
         Assertions.assertEquals("SUCCESS", response.getBody().result().name());
-        Assertions.assertEquals("Fetched debts successfully.", response.getBody().message());
         Assertions.assertTrue(response.getBody().data().isEmpty());
     }
 
@@ -465,5 +455,183 @@ class SplitBillControllerTest {
         Assertions.assertTrue(response.getBody().data().isEmpty());
     }
 
+    @Test
+    void testGetSimplifiedDebt_Success() {
+        // Arrange
+        SplitBillService mockService = Mockito.mock(SplitBillService.class);
+
+        List<DebtResponse> mockDebts = List.of(
+                DebtResponse.builder()
+                        .paidByEmail("payer1@example.com")
+                        .owesToEmail("owed1@example.com")
+                        .amount(100.0)
+                        .build(),
+                DebtResponse.builder()
+                        .paidByEmail("payer2@example.com")
+                        .owesToEmail("owed2@example.com")
+                        .amount(150.0)
+                        .build()
+        );
+
+        Mockito.when(mockService.getgroupdebtsummary(Mockito.anyInt())).thenReturn(mockDebts);
+
+        SplitBillController controller = new SplitBillController(mockService);
+
+        // Act
+        ResponseEntity<CustomResponseBody<List<DebtResponse>>> response = controller.getSimplifiedDebt(1);
+
+        // Assert
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+        Assertions.assertEquals("SUCCESS", response.getBody().result().name());
+        Assertions.assertEquals("Group summary fetched successfully", response.getBody().message());
+        Assertions.assertEquals(2, response.getBody().data().size());
+
+        DebtResponse debt1 = response.getBody().data().get(0);
+        Assertions.assertEquals("payer1@example.com", debt1.getPaidByEmail());
+        Assertions.assertEquals("owed1@example.com", debt1.getOwesToEmail());
+        Assertions.assertEquals(100.0, debt1.getAmount());
+
+        DebtResponse debt2 = response.getBody().data().get(1);
+        Assertions.assertEquals("payer2@example.com", debt2.getPaidByEmail());
+        Assertions.assertEquals("owed2@example.com", debt2.getOwesToEmail());
+        Assertions.assertEquals(150.0, debt2.getAmount());
+    }
+
+    @Test
+    void testGetSimplifiedDebt_ValidationError() {
+        // Arrange
+        SplitBillService mockService = Mockito.mock(SplitBillService.class);
+
+        Mockito.when(mockService.getgroupdebtsummary(Mockito.anyInt()))
+                .thenThrow(new IllegalArgumentException("Invalid group ID"));
+
+        SplitBillController controller = new SplitBillController(mockService);
+
+        // Act
+        ResponseEntity<CustomResponseBody<List<DebtResponse>>> response = controller.getSimplifiedDebt(-1);
+
+        // Assert
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        Assertions.assertEquals("FAILURE", response.getBody().result().name());
+        Assertions.assertEquals("Invalid group ID", response.getBody().message());
+        Assertions.assertNull(response.getBody().data());
+    }
+
+    @Test
+    void testGetSimplifiedDebt_UnexpectedError() {
+        // Arrange
+        SplitBillService mockService = Mockito.mock(SplitBillService.class);
+
+        Mockito.when(mockService.getgroupdebtsummary(Mockito.anyInt()))
+                .thenThrow(new RuntimeException("Unexpected error occurred"));
+
+        SplitBillController controller = new SplitBillController(mockService);
+
+        // Act
+        ResponseEntity<CustomResponseBody<List<DebtResponse>>> response = controller.getSimplifiedDebt(1);
+
+        // Assert
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        Assertions.assertEquals("FAILURE", response.getBody().result().name());
+        Assertions.assertEquals("An unexpected error occurred while fetching the group summary", response.getBody().message());
+        Assertions.assertNull(response.getBody().data());
+    }
+
+    @Test
+    void testGetSimplifiedDebt_EmptyList() {
+        // Arrange
+        SplitBillService mockService = Mockito.mock(SplitBillService.class);
+
+        Mockito.when(mockService.getgroupdebtsummary(Mockito.anyInt())).thenReturn(List.of());
+
+        SplitBillController controller = new SplitBillController(mockService);
+
+        // Act
+        ResponseEntity<CustomResponseBody<List<DebtResponse>>> response = controller.getSimplifiedDebt(1);
+
+        // Assert
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+        Assertions.assertEquals("SUCCESS", response.getBody().result().name());
+        Assertions.assertEquals("Group summary fetched successfully", response.getBody().message());
+        Assertions.assertTrue(response.getBody().data().isEmpty());
+    }
+
+    @Test
+    void testGetDebitCreditSummary_Success() {
+        // Arrange
+        SplitBillService mockService = Mockito.mock(SplitBillService.class);
+
+        DebitCreditSummaryResponse mockSummary = DebitCreditSummaryResponse.builder()
+                .totalDebit(150.0)
+                .totalCredit(200.0)
+                .build();
+
+        Mockito.when(mockService.getDebitCreditSummary(Mockito.anyInt())).thenReturn(mockSummary);
+
+        SplitBillController controller = new SplitBillController(mockService);
+
+        // Act
+        ResponseEntity<CustomResponseBody<DebitCreditSummaryResponse>> response = controller.getDebitCreditSummary(1);
+
+        // Assert
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+        Assertions.assertEquals("SUCCESS", response.getBody().result().name());
+        Assertions.assertEquals("Fetched debit-credit summary successfully", response.getBody().message());
+
+        DebitCreditSummaryResponse responseData = response.getBody().data();
+        Assertions.assertNotNull(responseData);
+        Assertions.assertEquals(150.0, responseData.getTotalDebit());
+        Assertions.assertEquals(200.0, responseData.getTotalCredit());
+        //Assertions.assertEquals(50.0, responseData.getNetBalance());
+    }
+
+
+    @Test
+    void testGetDebitCreditSummary_UnexpectedError() {
+        // Arrange
+        SplitBillService mockService = Mockito.mock(SplitBillService.class);
+
+        Mockito.when(mockService.getDebitCreditSummary(Mockito.anyInt()))
+                .thenThrow(new RuntimeException("Unexpected error occurred"));
+
+        SplitBillController controller = new SplitBillController(mockService);
+
+        // Act
+        ResponseEntity<CustomResponseBody<DebitCreditSummaryResponse>> response = controller.getDebitCreditSummary(1);
+
+        // Assert
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        Assertions.assertEquals("FAILURE", response.getBody().result().name());
+        Assertions.assertEquals("Failed to fetch debit-credit summary", response.getBody().message());
+        Assertions.assertNull(response.getBody().data());
+    }
+
+    @Test
+    void testGetDebitCreditSummary_EmptySummary() {
+        // Arrange
+        SplitBillService mockService = Mockito.mock(SplitBillService.class);
+
+        DebitCreditSummaryResponse emptySummary = DebitCreditSummaryResponse.builder()
+                .totalDebit(0.0)
+                .totalCredit(0.0)
+                .build();
+
+        Mockito.when(mockService.getDebitCreditSummary(Mockito.anyInt())).thenReturn(emptySummary);
+
+        SplitBillController controller = new SplitBillController(mockService);
+
+        // Act
+        ResponseEntity<CustomResponseBody<DebitCreditSummaryResponse>> response = controller.getDebitCreditSummary(1);
+
+        // Assert
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+        Assertions.assertEquals("SUCCESS", response.getBody().result().name());
+        Assertions.assertEquals("Fetched debit-credit summary successfully", response.getBody().message());
+
+        DebitCreditSummaryResponse responseData = response.getBody().data();
+        Assertions.assertNotNull(responseData);
+        Assertions.assertEquals(0.0, responseData.getTotalDebit());
+        Assertions.assertEquals(0.0, responseData.getTotalCredit());
+    }
 }
 

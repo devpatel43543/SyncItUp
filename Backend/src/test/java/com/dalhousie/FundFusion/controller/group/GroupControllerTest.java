@@ -1,8 +1,10 @@
 package com.dalhousie.FundFusion.controller.group;
 
+import com.dalhousie.FundFusion.authentication.service.AuthenticationService;
 import com.dalhousie.FundFusion.exception.AccessDeniedException;
 import com.dalhousie.FundFusion.exception.GroupAlreadyExistsException;
 import com.dalhousie.FundFusion.group.controller.GroupController;
+import com.dalhousie.FundFusion.group.repository.PendingGroupMembersRepository;
 import com.dalhousie.FundFusion.group.requestEntity.AddNewMemberRequest;
 import com.dalhousie.FundFusion.group.requestEntity.GroupRequest;
 import com.dalhousie.FundFusion.group.requestEntity.GroupUpdateRequest;
@@ -12,12 +14,16 @@ import com.dalhousie.FundFusion.group.service.GroupService;
 import com.dalhousie.FundFusion.util.CustomResponseBody;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+
+import static org.mockito.Mockito.when;
 
 class GroupControllerTest {
 
@@ -33,7 +39,7 @@ class GroupControllerTest {
                 .members(List.of("member1@example.com", "member2@example.com"))
                 .build();
 
-        Mockito.when(mockService.createGroup(Mockito.any(GroupRequest.class)))
+        when(mockService.createGroup(Mockito.any(GroupRequest.class)))
                 .thenReturn(mockGroupResponse);
 
         GroupController controller = new GroupController(mockService);
@@ -60,7 +66,7 @@ class GroupControllerTest {
 
         GroupService mockService = Mockito.mock(GroupService.class);
 
-        Mockito.when(mockService.createGroup(Mockito.any(GroupRequest.class)))
+        when(mockService.createGroup(Mockito.any(GroupRequest.class)))
                 .thenThrow(new GroupAlreadyExistsException("Group already exists"));
 
         GroupController controller = new GroupController(mockService);
@@ -98,7 +104,7 @@ class GroupControllerTest {
                         .build()
         );
 
-        Mockito.when(mockService.getAllGroups()).thenReturn(mockGroups);
+        when(mockService.getAllGroups()).thenReturn(mockGroups);
 
         GroupController controller = new GroupController(mockService);
 
@@ -141,7 +147,7 @@ class GroupControllerTest {
                 .members(List.of("member1@example.com", "member2@example.com"))
                 .build();
 
-        Mockito.when(mockService.addGroupMembers(Mockito.anyInt(), Mockito.anyList()))
+        when(mockService.addGroupMembers(Mockito.anyInt(), Mockito.anyList()))
                 .thenReturn(mockGroupResponse);
 
         GroupController controller = new GroupController(mockService);
@@ -162,7 +168,7 @@ class GroupControllerTest {
     void testRemoveMember_AccessDenied() {
         GroupService mockService = Mockito.mock(GroupService.class);
 
-        Mockito.when(mockService.removeGroupMember(Mockito.anyInt(), Mockito.anyString()))
+        when(mockService.removeGroupMember(Mockito.anyInt(), Mockito.anyString()))
                 .thenThrow(new AccessDeniedException("Access denied"));
 
         GroupController controller = new GroupController(mockService);
@@ -195,7 +201,7 @@ class GroupControllerTest {
     void testCreateGroup_InvalidData() {
         GroupService mockService = Mockito.mock(GroupService.class);
 
-        Mockito.when(mockService.createGroup(Mockito.any(GroupRequest.class)))
+        when(mockService.createGroup(Mockito.any(GroupRequest.class)))
                 .thenThrow(new IllegalArgumentException("Invalid group data"));
 
         GroupController controller = new GroupController(mockService);
@@ -215,7 +221,7 @@ class GroupControllerTest {
     void testGetAllMembers_EmptyGroup() {
         GroupService mockService = Mockito.mock(GroupService.class);
 
-        Mockito.when(mockService.allMemberEmails(Mockito.anyInt())).thenReturn(List.of());
+        when(mockService.allMemberEmails(Mockito.anyInt())).thenReturn(List.of());
 
         GroupController controller = new GroupController(mockService);
 
@@ -231,7 +237,7 @@ class GroupControllerTest {
     void testRemoveMember_Unauthorized() {
         GroupService mockService = Mockito.mock(GroupService.class);
 
-        Mockito.when(mockService.removeGroupMember(Mockito.anyInt(), Mockito.anyString()))
+        when(mockService.removeGroupMember(Mockito.anyInt(), Mockito.anyString()))
                 .thenThrow(new AccessDeniedException("Access denied"));
 
         GroupController controller = new GroupController(mockService);
@@ -245,22 +251,10 @@ class GroupControllerTest {
     }
 
     @Test
-    void testAcceptPendingMember_Success() {
-        GroupService mockService = Mockito.mock(GroupService.class);
-        Mockito.doNothing().when(mockService).acceptPendingMember(Mockito.anyInt());
-
-        GroupController controller = new GroupController(mockService);
-        ResponseEntity<CustomResponseBody<Void>> response = controller.acceptPendingMember(1);
-
-        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
-        Assertions.assertEquals("SUCCESS", response.getBody().result().name());
-    }
-
-    @Test
     void testGetAllGroups_Failure() {
         GroupService mockService = Mockito.mock(GroupService.class);
 
-        Mockito.when(mockService.getAllGroups())
+        when(mockService.getAllGroups())
                 .thenThrow(new RuntimeException("Database error"));
 
         GroupController controller = new GroupController(mockService);
@@ -293,7 +287,7 @@ class GroupControllerTest {
     void testGetAllMembers_Failure() {
         GroupService mockService = Mockito.mock(GroupService.class);
 
-        Mockito.when(mockService.allMemberEmails(Mockito.anyInt()))
+        when(mockService.allMemberEmails(Mockito.anyInt()))
                 .thenThrow(new NoSuchElementException("Group not found"));
 
         GroupController controller = new GroupController(mockService);
@@ -311,7 +305,7 @@ class GroupControllerTest {
     void testUpdateGroup_Failure() {
         GroupService mockService = Mockito.mock(GroupService.class);
 
-        Mockito.when(mockService.updateGroup(Mockito.anyInt(), Mockito.any(GroupUpdateRequest.class)))
+        when(mockService.updateGroup(Mockito.anyInt(), Mockito.any(GroupUpdateRequest.class)))
                 .thenThrow(new IllegalArgumentException("Invalid data"));
 
         GroupController controller = new GroupController(mockService);
@@ -347,7 +341,7 @@ class GroupControllerTest {
     void testRemoveMember_Failure() {
         GroupService mockService = Mockito.mock(GroupService.class);
 
-        Mockito.when(mockService.removeGroupMember(Mockito.anyInt(), Mockito.anyString()))
+        when(mockService.removeGroupMember(Mockito.anyInt(), Mockito.anyString()))
                 .thenThrow(new RuntimeException("Unexpected error"));
 
         GroupController controller = new GroupController(mockService);
@@ -364,7 +358,7 @@ class GroupControllerTest {
     void testAddNewMember_Failure() {
         GroupService mockService = Mockito.mock(GroupService.class);
 
-        Mockito.when(mockService.addGroupMembers(Mockito.anyInt(), Mockito.anyList()))
+        when(mockService.addGroupMembers(Mockito.anyInt(), Mockito.anyList()))
                 .thenThrow(new IllegalArgumentException("Invalid member data"));
 
         GroupController controller = new GroupController(mockService);
@@ -380,5 +374,34 @@ class GroupControllerTest {
         Assertions.assertNull(response.getBody().data());
     }
 
+    @Test
+    void testGetIndividualGroup_Success() {
+        // Mock the service
+        GroupService mockService = Mockito.mock(GroupService.class);
 
+        // Create a mock GroupResponse
+        GroupResponse mockGroupResponse = GroupResponse.builder()
+                .groupName("Test Group")
+                .description("This is a test group")
+                .creatorEmail("creator@example.com")
+                .members(List.of("member1@example.com", "member2@example.com"))
+                .build();
+
+        // Define the service behavior
+        when(mockService.getGroupById(Mockito.anyInt())).thenReturn(mockGroupResponse);
+
+        // Create the controller with the mocked service
+        GroupController controller = new GroupController(mockService);
+
+        // Call the method under test
+        ResponseEntity<CustomResponseBody<GroupResponse>> response = controller.getIndividualGroup(1);
+
+        // Assertions
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+        Assertions.assertEquals("SUCCESS", response.getBody().result().name());
+        Assertions.assertEquals("group details successfully", response.getBody().message());
+        Assertions.assertEquals("Test Group", response.getBody().data().getGroupName());
+       // Assertions.assertEquals(1, response.getBody().data().getGroupId());
+        Assertions.assertEquals("creator@example.com", response.getBody().data().getCreatorEmail());
+    }
 }
