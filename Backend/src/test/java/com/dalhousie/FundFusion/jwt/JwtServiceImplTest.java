@@ -105,44 +105,6 @@ class JwtServiceImplTest {
         assertFalse(jwtService.isTokenValid(token, userDetails));
     }
 
-//    @Test
-//    void testIsTokenExpired_ExpiredToken() {
-//        String expiredToken = Jwts.builder()
-//                .setSubject("testuser")
-//                .setIssuedAt(new Date(System.currentTimeMillis() - 1000 * 60 * 60 * 24 * 21)) // 21 days ago
-//                .setExpiration(new Date(System.currentTimeMillis() - 1000)) // Already expired
-//                //.signWith(jwtService.getSignInKey(), SignatureAlgorithm.HS256)
-//                .compact();
-//
-//        assertTrue(jwtService.isTokenExpired(expiredToken));
-//    }
-//
-//    @Test
-//    void testIsTokenExpired_NonExpiredToken() {
-//        String token = jwtService.generateToken(userDetails, true);
-//
-//        assertFalse(jwtService.isTokenExpired(token));
-//    }
-//
-//    @Test
-//    void testExtractAllClaims_ValidToken() {
-//        String token = jwtService.generateToken(userDetails, true);
-//
-//        Claims claims = jwtService.extractAllClaims(token);
-//
-//        assertNotNull(claims);
-//        assertEquals("testuser", claims.getSubject());
-//    }
-//
-//    @Test
-//    void testExtractAllClaims_InvalidToken() {
-//        String token = "invalidToken";
-//
-//        Exception exception = assertThrows(Exception.class, () -> jwtService.extractAllClaims(token));
-//
-//        assertNotNull(exception);
-//    }
-
     @Test
     void testBuildToken() {
         when(userDetails.getUsername()).thenReturn("testuser");

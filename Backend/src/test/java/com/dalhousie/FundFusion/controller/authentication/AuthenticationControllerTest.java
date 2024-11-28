@@ -188,27 +188,6 @@ public class AuthenticationControllerTest {
         Assertions.assertNull(response.getBody().data());
     }
 
-//    @Test
-//    void testForgotPassword_UserNotFound() {
-//
-//        AuthenticationService mockService = Mockito.mock(AuthenticationService.class);
-//
-//        Mockito.doThrow(new UserNotFoundException("User not found"))
-//                .when(mockService);
-////                .forgotPassword(Mockito.eq("unknown@example.com"), Mockito.anyString());
-//
-//        AuthenticationController controller = new AuthenticationController(mockService);
-//
-//        ForgotPasswordRequest request = new ForgotPasswordRequest();
-//        request.setEmail("unknown@example.com");
-//
-//        ResponseEntity<CustomResponseBody<String>> response = controller.forgotPassword(null, request);
-//
-//        Assertions.assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-//        Assertions.assertEquals("FAILURE", response.getBody().result().name());
-//        Assertions.assertEquals("User not found", response.getBody().message());
-//        Assertions.assertNull(response.getBody().data());
-//    }
 
     @Test
     void testVerifyOtp_InvalidOtp() {

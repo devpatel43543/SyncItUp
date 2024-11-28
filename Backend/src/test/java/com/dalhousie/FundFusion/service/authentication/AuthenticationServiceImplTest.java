@@ -207,7 +207,6 @@ class AuthenticationServiceImplTest {
         assertThrows(TokenExpiredException.class, () -> {
             authenticationService.verifyOtp(otpVarificationRequest);
         });
-        //assertThrows(Throwable.class, () -> authenticationService.verifyOtp(otpVarificationRequest));
     }
 
     @Test
@@ -310,7 +309,6 @@ class AuthenticationServiceImplTest {
 
     @Test
     void shouldThrowRuntimeException_whenUrlIsMalformed() {
-        // Mock HttpServletRequest
         HttpServletRequest mockRequest = mock(HttpServletRequest.class);
         when(mockRequest.getRequestURL()).thenReturn(new StringBuffer("malformed-url"));
         when(mockRequest.getServletPath()).thenReturn("/api/check");
@@ -323,14 +321,11 @@ class AuthenticationServiceImplTest {
 
     @Test
     public void testResendOtp_UserNotFound() {
-        // Arrange
         Integer invalidUserId = 999; // Simulate an invalid user ID
         when(userRepository.findById(invalidUserId)).thenReturn(Optional.empty()); // Mock user not found
 
-        // Act & Assert
         assertThrows(Throwable.class, () ->authenticationService.resendOtp());
 
-        // Verify that no other interactions occur
         verify(otpService, never()).resendOtp(anyInt());
     }
 }

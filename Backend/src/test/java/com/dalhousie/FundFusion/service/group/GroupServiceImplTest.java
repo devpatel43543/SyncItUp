@@ -347,18 +347,6 @@ public class GroupServiceImplTest {
         assertThrows(RuntimeException.class, () -> groupService.getGroupById(999));
     }
 
-//    @Test
-//    public void testAcceptPendingMember_NoPendingRequest() {
-//        when(pendingGroupMembersRepository.findByEmailAndGroupId("member@example.com", 1)).thenReturn(Optional.empty());
-//        assertThrows(MemberNotExist.class, () -> groupService.acceptPendingMember(1));
-//    }
-//
-//    @Test
-//    public void testRejectPendingMember_NoPendingRequest() {
-//        when(pendingGroupMembersRepository.findByEmailAndGroupId("member@example.com", 1)).thenReturn(Optional.empty());
-//        assertThrows(MemberNotExist.class, () -> groupService.rejectPendingMember(1));
-//    }
-
     @Test
     public void testGetAllGroups_NoGroups() {
         when(userRepository.findByEmail("creator@example.com")).thenReturn(Optional.of(user));
