@@ -13,6 +13,8 @@ import jakarta.validation.constraints.Size;
 @NoArgsConstructor
 @Builder
 public class RegisterRequest {
+    private static final int MIN_PASSWORD_LENGTH = 8;
+
     @NotBlank(message = "Name is required")
     private String name;
 
@@ -24,4 +26,41 @@ public class RegisterRequest {
     @NotBlank(message = "Password is required")
     @Size(min = 8, message = "Password must have at least 8 characters")
     private String password;
+
+    /**
+     * Validates the register request fields.
+     *
+     * @throws IllegalArgumentException if any field is invalid.
+     */
+    public void validate() {
+        if (isInvalidName(name)) {
+            throw new IllegalArgumentException("Name is required.");
+        }
+        if (isInvalidEmail(email)) {
+            throw new IllegalArgumentException("Invalid email address.");
+        }
+        if (isInvalidPassword(password)) {
+            throw new IllegalArgumentException("Password must have at least " + MIN_PASSWORD_LENGTH + " characters.");
+        }
+    }
+
+    private boolean isInvalidName(String name) {
+        return isNullOrBlank(name);
+    }
+
+    private boolean isInvalidEmail(String email) {
+        return isNullOrBlank(email) || isInvalidFormat(email);
+    }
+
+    private boolean isInvalidPassword(String password) {
+        return password == null || password.length() < MIN_PASSWORD_LENGTH;
+    }
+
+    private boolean isNullOrBlank(String value) {
+        return value == null || value.isBlank();
+    }
+
+    private boolean isInvalidFormat(String email) {
+        return !email.contains("@");
+    }
 }

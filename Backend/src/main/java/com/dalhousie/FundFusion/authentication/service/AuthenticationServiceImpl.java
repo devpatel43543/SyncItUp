@@ -51,7 +51,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final GroupRepository groupRepository;
     private final PendingGroupMembersRepository pendingGroupMembershipRepository;
     private final UserGroupRepository userGroupRepository;
-    private final int frontendPort = 80;
+    private final int frontendPort = 5173;
     private final ResetTokenService resetTokenService;
     private final JavaMailSender javaMailSender;
     private final OtpService otpService;
