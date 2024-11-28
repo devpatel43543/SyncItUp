@@ -44,6 +44,16 @@ public class TransactionSummaryResponse {
         }
     }
 
+    /**
+     * Provides a formatted string summarizing the transaction details.
+     *
+     * @return A summary string with the transaction details.
+     */
+    public String getTransactionSummary() {
+        return String.format("Transaction [%s]: %.2f paid by %s on %s. Title: %s, Category: %s.",
+                transactionId, amountPaid, paidByEmail, transactionDate, title, category);
+    }
+
     private boolean isNullOrBlank(String value) {
         return value == null || value.isBlank();
     }

@@ -35,6 +35,15 @@ public class UserDebtResponse {
         }
     }
 
+    /**
+     * Provides a summary of the user's debt details.
+     *
+     * @return A formatted string representing the debt information.
+     */
+    public String getDebtDetails() {
+        return String.format("User owes %.2f in group %s (%d), to creditor: %s.", amount, groupName, groupId, creditorEmail);
+    }
+
     private boolean isNullOrBlank(String value) {
         return value == null || value.isBlank();
     }

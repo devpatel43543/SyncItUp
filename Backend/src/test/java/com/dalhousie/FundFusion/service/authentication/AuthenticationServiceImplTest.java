@@ -5,15 +5,19 @@ import static org.mockito.Mockito.*;
 
 import com.dalhousie.FundFusion.authentication.entity.Otp;
 import com.dalhousie.FundFusion.authentication.entity.PasswordReset;
+import com.dalhousie.FundFusion.authentication.repository.OtpRepository;
 import com.dalhousie.FundFusion.authentication.requestEntity.OtpVarificationRequest;
 import com.dalhousie.FundFusion.authentication.service.AuthenticationServiceImpl;
 import com.dalhousie.FundFusion.authentication.service.OtpService;
+import com.dalhousie.FundFusion.authentication.service.ResetTokenService;
 import com.dalhousie.FundFusion.exception.TokenExpiredException;
 import com.dalhousie.FundFusion.authentication.requestEntity.AuthenticateRequest;
 import com.dalhousie.FundFusion.authentication.requestEntity.RegisterRequest;
 import com.dalhousie.FundFusion.authentication.responseEntity.AuthenticationResponse;
 import com.dalhousie.FundFusion.exception.TokenInvalidExaption;
+import com.dalhousie.FundFusion.group.repository.GroupRepository;
 import com.dalhousie.FundFusion.group.repository.PendingGroupMembersRepository;
+import com.dalhousie.FundFusion.group.repository.UserGroupRepository;
 import com.dalhousie.FundFusion.jwt.JwtService;
 import com.dalhousie.FundFusion.user.entity.User;
 import com.dalhousie.FundFusion.user.repository.UserRepository;
@@ -23,9 +27,7 @@ import jakarta.mail.internet.MimeMessage;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -35,33 +37,38 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.Optional;
 
 class AuthenticationServiceImplTest {
-
     @Mock
     private UserRepository userRepository;
-
-    @Mock
-    private JavaMailSender javaMailSender;
-
-    @Mock
-    private MimeMessage mimeMessage; // Mock MimeMessage
-
-    @Mock
-    private MimeMessageHelper mimeMessageHelper;
-
-    @Mock
-    private PendingGroupMembersRepository pendingGroupMembersRepository;
-
-    @Mock
-    private OtpService otpService;
 
     @Mock
     private PasswordEncoder passwordEncoder;
 
     @Mock
+    private JwtService jwtService;
+
+    @Mock
     private AuthenticationManager authenticationManager;
 
     @Mock
-    private JwtService jwtService;
+    private GroupRepository groupRepository;
+
+    @Mock
+    private PendingGroupMembersRepository pendingGroupMembersRepository;
+
+    @Mock
+    private UserGroupRepository userGroupRepository;
+
+    @Mock
+    private ResetTokenService resetTokenService;
+
+    @Mock
+    private JavaMailSender javaMailSender;
+
+    @Mock
+    private OtpService otpService;
+
+    @Mock
+    private OtpRepository otpRepository;
 
     @InjectMocks
     private AuthenticationServiceImpl authenticationService;
@@ -69,7 +76,13 @@ class AuthenticationServiceImplTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+        authenticationService = Mockito.spy(new AuthenticationServiceImpl(
+                userRepository, passwordEncoder, jwtService, authenticationManager,
+                groupRepository, pendingGroupMembersRepository, userGroupRepository,
+                resetTokenService, javaMailSender, otpService, otpRepository
+        ));
     }
+
 
     @Test
     void ShouldRegisterUser_WhenUserDoesNotExist() {
@@ -286,44 +299,87 @@ class AuthenticationServiceImplTest {
 
         verify(javaMailSender, times(1)).send(mimeMessage);
     }
-
     @Test
     void shouldThrowException_whenForgotPasswordEmailIsNull() {
-        assertThrows(Throwable.class, () -> authenticationService.forgotPassword(null, "http://example.com/reset"));
+        HttpServletRequest mockRequest = mock(HttpServletRequest.class);
+        Exception exception = assertThrows(IllegalArgumentException.class, () ->
+                authenticationService.handleForgotPassword(mockRequest, null));
+        assertTrue(exception.getMessage().contains("Email cannot be null"));
     }
-
     @Test
     void shouldReturnUrlWithPort_whenHostIsLocalhost() {
+        // Mock HttpServletRequest
         HttpServletRequest mockRequest = mock(HttpServletRequest.class);
-
         when(mockRequest.getRequestURL()).thenReturn(new StringBuffer("http://localhost/api/check"));
         when(mockRequest.getServletPath()).thenReturn("/api/check");
 
-        String result = authenticationService.getURL(mockRequest);
+        // Mock getUserByEmail to return a valid user
+        User mockUser = new User();
+        mockUser.setId(1);
+        mockUser.setEmail("test@example.com");
+        doReturn(mockUser).when(authenticationService).getUserByEmail("test@example.com");
 
-        assertEquals("http://localhost:80", result);
+        // Mock the reset token creation
+        PasswordReset passwordReset = new PasswordReset();
+        passwordReset.setToken("reset-token");
+        when(resetTokenService.createResetPasswordToken(mockUser.getId())).thenReturn(passwordReset);
+
+        // Capture the reset link
+        ArgumentCaptor<String> resetLinkCaptor = ArgumentCaptor.forClass(String.class);
+
+        // Call the handleForgotPassword method
+        authenticationService.handleForgotPassword(mockRequest, "test@example.com");
+
+        // Verify the reset link generation
+        verify(authenticationService, times(1)).forgotPasswordMailBody(resetLinkCaptor.capture(), eq("test@example.com"));
+        String capturedResetLink = resetLinkCaptor.getValue();
+
+        // Assert that the URL is constructed with the correct port for localhost
+        assertTrue(capturedResetLink.contains("http://localhost:5173/resetPassword"), "The reset link should contain the expected URL with port 5173 for localhost.");
     }
 
     @Test
     void shouldReturnUrlWithoutPort_whenHostIsNotLocalhost() {
+        // Mock HttpServletRequest
         HttpServletRequest mockRequest = mock(HttpServletRequest.class);
-
         when(mockRequest.getRequestURL()).thenReturn(new StringBuffer("http://example.com/api/check"));
         when(mockRequest.getServletPath()).thenReturn("/api/check");
 
-        String result = authenticationService.getURL(mockRequest);
+        // Mock getUserByEmail to return a valid user
+        User mockUser = new User();
+        mockUser.setId(1);
+        mockUser.setEmail("test@example.com");
+        doReturn(mockUser).when(authenticationService).getUserByEmail("test@example.com");
 
-        assertEquals("http://example.com", result);
+        // Mock the reset token creation
+        PasswordReset passwordReset = new PasswordReset();
+        passwordReset.setToken("reset-token");
+        when(resetTokenService.createResetPasswordToken(mockUser.getId())).thenReturn(passwordReset);
+
+        // Capture the reset link
+        ArgumentCaptor<String> resetLinkCaptor = ArgumentCaptor.forClass(String.class);
+
+        // Call the handleForgotPassword method
+        authenticationService.handleForgotPassword(mockRequest, "test@example.com");
+
+        // Verify the reset link generation
+        verify(authenticationService, times(1)).forgotPasswordMailBody(resetLinkCaptor.capture(), eq("test@example.com"));
+        String capturedResetLink = resetLinkCaptor.getValue();
+
+        // Assert that the URL is constructed without the port for non-localhost
+        assertTrue(capturedResetLink.contains("http://example.com/resetPassword"), "The reset link should contain the expected URL without a port for non-localhost.");
     }
 
     @Test
     void shouldThrowRuntimeException_whenUrlIsMalformed() {
+        // Mock HttpServletRequest
         HttpServletRequest mockRequest = mock(HttpServletRequest.class);
-
         when(mockRequest.getRequestURL()).thenReturn(new StringBuffer("malformed-url"));
         when(mockRequest.getServletPath()).thenReturn("/api/check");
 
-        Exception exception = assertThrows(RuntimeException.class, () -> authenticationService.getURL(mockRequest));
+        // Assert that RuntimeException is thrown when the URL is malformed
+        Exception exception = assertThrows(RuntimeException.class, () ->
+                authenticationService.handleForgotPassword(mockRequest, "test@example.com"));
         assertTrue(exception.getMessage().contains("Failed to construct the correct URL"));
     }
 }

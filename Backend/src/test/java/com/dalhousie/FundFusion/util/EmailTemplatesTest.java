@@ -10,11 +10,11 @@ public class EmailTemplatesTest {
     @Test
     void testOtpEmailTemplate_NotNull() {
         // Verify that the OTP email template is not null
-        assertNotNull(EmailTemplates.OTP_EMAIL_TEMPLATE);
+        assertNotNull(EmailTemplates.getOtpEmailTemplate());
 
         // Replace placeholder and validate the content
         String otp = "123456";
-        String formattedOtpTemplate = String.format(EmailTemplates.OTP_EMAIL_TEMPLATE, otp);
+        String formattedOtpTemplate = String.format(EmailTemplates.getOtpEmailTemplate(), otp);
         assertNotNull(formattedOtpTemplate);
         assertEquals("""
                 <p>Hello,</p>
@@ -27,11 +27,11 @@ public class EmailTemplatesTest {
     @Test
     void testForgotPasswordEmailTemplate_NotNull() {
         // Verify that the Forgot Password email template is not null
-        assertNotNull(EmailTemplates.FORGOT_PASSWORD_EMAIL_TEMPLATE);
+        assertNotNull(EmailTemplates.getForgotPasswordEmailTemplate());
 
         // Replace placeholder and validate the content
         String resetLink = "https://example.com/reset";
-        String formattedForgotPasswordTemplate = String.format(EmailTemplates.FORGOT_PASSWORD_EMAIL_TEMPLATE, resetLink);
+        String formattedForgotPasswordTemplate = String.format(EmailTemplates.getForgotPasswordEmailTemplate(), resetLink);
         assertNotNull(formattedForgotPasswordTemplate);
         assertEquals("""
                 <p>Hello,</p>

@@ -27,6 +27,15 @@ public class DebtResponse {
         }
     }
 
+    /**
+     * Provides a summary of the debt details.
+     *
+     * @return A human-readable string representation of the debt information.
+     */
+    public String getDebtSummary() {
+        return String.format("%s owes %s an amount of %.2f.", owesToEmail, paidByEmail, amount);
+    }
+
     private boolean isNullOrBlank(String value) {
         return value == null || value.isBlank();
     }
