@@ -17,4 +17,38 @@ public class TransactionSummaryResponse {
     private List<String> involvedMembers; // New field to include member emails
     private String title;
     private String category;
+
+    /**
+     * Validates the response fields.
+     *
+     * @throws IllegalArgumentException if any field is invalid.
+     */
+    public void validate() {
+        if (transactionId == null || transactionId < 0) {
+            throw new IllegalArgumentException("Transaction ID must be a valid positive number.");
+        }
+        if (amountPaid == null || amountPaid <= 0) {
+            throw new IllegalArgumentException("Amount paid must be a positive number.");
+        }
+        if (isNullOrBlank(paidByEmail) || !isValidEmail(paidByEmail)) {
+            throw new IllegalArgumentException("Paid by email must be a valid email address.");
+        }
+        if (involvedMembers == null || involvedMembersCount == null || involvedMembers.size() != involvedMembersCount) {
+            throw new IllegalArgumentException("Involved members list and count must match.");
+        }
+        if (isNullOrBlank(title)) {
+            throw new IllegalArgumentException("Title cannot be null or empty.");
+        }
+        if (isNullOrBlank(category)) {
+            throw new IllegalArgumentException("Category cannot be null or empty.");
+        }
+    }
+
+    private boolean isNullOrBlank(String value) {
+        return value == null || value.isBlank();
+    }
+
+    private boolean isValidEmail(String email) {
+        return email.contains("@");
+    }
 }
