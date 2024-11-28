@@ -1,13 +1,15 @@
 version: "3.3"
 services:
-  frontend:
+  frontend_test:
+    container_name: fund_fusion_frontend_test
     build:
       context: ../Frontend
       dockerfile: Dockerfile_test
     ports:
       - "80:80"
 
-  backend:
+  backend_test:
+    container_name: fund_fusion_backend_test
     build:
       context: ../Backend
       dockerfile: Dockerfile_test

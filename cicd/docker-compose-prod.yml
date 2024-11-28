@@ -1,6 +1,7 @@
 version: "3.3"
 services:
-  frontend:
+  frontend_prod:
+    container_name: fund_fusion_frontend_prod
     build:
       context: ../Frontend
       dockerfile: Dockerfile_prod
@@ -9,7 +10,8 @@ services:
     ports:
       - "81:81"
 
-  backend:
+  backend_prod:
+    container_name: fund_fusion_backend_prod
     build:
       context: ../Backend
       dockerfile: Dockerfile_prod
