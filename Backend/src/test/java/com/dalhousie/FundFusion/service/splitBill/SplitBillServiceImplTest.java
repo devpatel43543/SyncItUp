@@ -56,40 +56,77 @@ public class SplitBillServiceImplTest {
     private User testUser2;
     private Transaction testTransaction;
 
+    // Constants for magic numbers
+    private static final double INITIAL_AMOUNT = 100.0;
+    private static final double UPDATED_AMOUNT = 200.0;
+    private static final double SHARE_AMOUNT = 50.0;
+    private static final double DEBIT_CREDIT_AMOUNT = 30.0;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        testGroup = new Group();
-        testGroup.setId(1);
-        testGroup.setGroupName("Test Group");
-
-        testUser1 = new User();
-        testUser1.setEmail("user1@example.com");
-
-        testUser2 = new User();
-        testUser2.setEmail("user2@example.com");
-
-        testTransaction = Transaction.builder()
-                .id(1L)
-                .group(testGroup)
-                .paidBy(testUser1)
-                .amount(100.0)
-                .title("Lunch")
-                .build();
+        testGroup = createTestGroup();
+        testUser1 = createTestUser("user1@example.com");
+        testUser2 = createTestUser("user2@example.com");
+        testTransaction = createTestTransaction(testGroup, testUser1, INITIAL_AMOUNT);
 
         when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
     }
 
-    @Test
-    void testCreateExpense_Success() {
+    private Group createTestGroup() {
+        Group group = new Group();
+        group.setId(1);
+        group.setGroupName("Test Group");
+        return group;
+    }
+
+    private User createTestUser(String email) {
+        User user = new User();
+        user.setEmail(email);
+        return user;
+    }
+
+    private Transaction createTestTransaction(Group group, User paidBy, double amount) {
+        return Transaction.builder()
+                .id(1L)
+                .group(group)
+                .paidBy(paidBy)
+                .amount(amount)
+                .title("Lunch")
+                .build();
+    }
+
+    private ExpenseShare createExpenseShare(Transaction transaction, User user, double shareAmount) {
+        return ExpenseShare.builder()
+                .transaction(transaction)
+                .user(user)
+                .shareAmount(shareAmount)
+                .build();
+    }
+
+    private AddExpenseRequest createAddExpenseRequest() {
         AddExpenseRequest request = new AddExpenseRequest();
         request.setGroupId(1);
         request.setPaidByEmail("user1@example.com");
-        request.setAmount(100.0);
+        request.setAmount(INITIAL_AMOUNT);
         request.setTitle("Lunch");
         request.setInvolvedMembers(Arrays.asList("user1@example.com", "user2@example.com"));
+        return request;
+    }
+
+    private SettleDebtRequest createSettleDebtRequest() {
+        SettleDebtRequest request = new SettleDebtRequest();
+        request.setGroupId(1);
+        request.setCreditorEmail("user1@example.com");
+        request.setAmount(SHARE_AMOUNT);
+        return request;
+    }
+
+    @Test
+    void testCreateExpense_Success() {
+        AddExpenseRequest request = createAddExpenseRequest();
 
         when(groupRepository.findById(1)).thenReturn(Optional.of(testGroup));
         when(userRepository.findByEmail("user1@example.com")).thenReturn(Optional.of(testUser1));
@@ -100,14 +137,14 @@ public class SplitBillServiceImplTest {
 
         assertNotNull(response);
         assertEquals("Test Group", response.getGroupName());
-        assertEquals(100.0, response.getTotalAmount());
+        assertEquals(INITIAL_AMOUNT, response.getTotalAmount());
     }
 
     @Test
     void testUpdateExpense_Success() {
         UpdateExpenseRequest request = new UpdateExpenseRequest();
         request.setTransactionId(1L);
-        request.setAmount(200.0);
+        request.setAmount(UPDATED_AMOUNT);
         request.setInvolvedMembers(Arrays.asList("user1@example.com", "user2@example.com"));
 
         when(transactionRepository.findById(1L)).thenReturn(Optional.of(testTransaction));
@@ -118,7 +155,7 @@ public class SplitBillServiceImplTest {
         AddExpenseResponse response = splitBillService.updateExpense(request);
 
         assertNotNull(response);
-        assertEquals(200.0, response.getTotalAmount());
+        assertEquals(UPDATED_AMOUNT, response.getTotalAmount());
     }
 
     @Test
@@ -134,13 +171,11 @@ public class SplitBillServiceImplTest {
 
     @Test
     void testGetTransactionDebts() {
+        ExpenseShare expenseShare = createExpenseShare(testTransaction, testUser2, SHARE_AMOUNT);
+
         when(groupRepository.findById(1)).thenReturn(Optional.of(testGroup));
         when(expenseShareRepository.findByTransactionGroup(testGroup))
-                .thenReturn(Collections.singletonList(ExpenseShare.builder()
-                        .transaction(testTransaction)
-                        .user(testUser2)
-                        .shareAmount(50.0)
-                        .build()));
+                .thenReturn(Collections.singletonList(expenseShare));
 
         List<DebtResponse> debts = splitBillService.getTransactionDebts(1);
 
@@ -151,21 +186,24 @@ public class SplitBillServiceImplTest {
 
     @Test
     void testGetGroupDebtSummary() {
-        when(authentication.getName()).thenReturn("user1@example.com");
-        when(userRepository.findByEmail("user1@example.com")).thenReturn(Optional.of(testUser1));
-        when(groupRepository.findById(1)).thenReturn(Optional.of(testGroup));
-        when(groupPartnershipRepository.findByGroup(testGroup)).thenReturn(Collections.singletonList(GroupPartnership.builder()
+        GroupPartnership groupPartnership = GroupPartnership.builder()
                 .group(testGroup)
                 .creditor(testUser1)
                 .debtor(testUser2)
-                .amount(100.0)
-                .build()));
+                .amount(INITIAL_AMOUNT)
+                .build();
+
+        when(authentication.getName()).thenReturn("user1@example.com");
+        when(userRepository.findByEmail("user1@example.com")).thenReturn(Optional.of(testUser1));
+        when(groupRepository.findById(1)).thenReturn(Optional.of(testGroup));
+        when(groupPartnershipRepository.findByGroup(testGroup))
+                .thenReturn(Collections.singletonList(groupPartnership));
 
         List<DebtResponse> summary = splitBillService.getgroupdebtsummary(1);
 
         assertNotNull(summary);
         assertEquals(1, summary.size());
-        assertEquals(100.0, summary.get(0).getAmount());
+        assertEquals(INITIAL_AMOUNT, summary.get(0).getAmount());
     }
 
     @Test
@@ -177,71 +215,79 @@ public class SplitBillServiceImplTest {
 
         assertNotNull(summary);
         assertEquals(1, summary.size());
-        assertEquals(100.0, summary.get(0).getAmountPaid());
+        assertEquals(INITIAL_AMOUNT, summary.get(0).getAmountPaid());
     }
 
     @Test
     void testGetDebtsForAuthenticatedUserByGroup() {
+        GroupPartnership groupPartnership = GroupPartnership.builder()
+                .group(testGroup)
+                .creditor(testUser1)
+                .debtor(testUser2)
+                .amount(SHARE_AMOUNT)
+                .build();
+
+        List<GroupPartnership> groupPartnerships = Collections.singletonList(groupPartnership); // Extracted into a variable
+
         when(authentication.getName()).thenReturn("user2@example.com");
         when(userRepository.findByEmail("user2@example.com")).thenReturn(Optional.of(testUser2));
         when(groupRepository.findById(1)).thenReturn(Optional.of(testGroup));
         when(groupPartnershipRepository.findByGroupAndDebtor(testGroup, testUser2))
-                .thenReturn(Collections.singletonList(GroupPartnership.builder()
-                        .group(testGroup)
-                        .creditor(testUser1)
-                        .debtor(testUser2)
-                        .amount(50.0)
-                        .build()));
+                .thenReturn(groupPartnerships);
 
         List<UserDebtResponse> debts = splitBillService.getDebtsForAuthenticatedUserByGroup(1);
 
         assertNotNull(debts);
         assertEquals(1, debts.size());
-        assertEquals(50.0, debts.get(0).getAmount());
+        assertEquals(SHARE_AMOUNT, debts.get(0).getAmount());
     }
 
     @Test
     void testSettleDebt_Success() {
-        SettleDebtRequest request = new SettleDebtRequest();
-        request.setGroupId(1);
-        request.setCreditorEmail("user1@example.com");
-        request.setAmount(50.0);
+        SettleDebtRequest request = createSettleDebtRequest();
+
+        GroupPartnership groupPartnership = GroupPartnership.builder()
+                .group(testGroup)
+                .creditor(testUser1)
+                .debtor(testUser2)
+                .amount(SHARE_AMOUNT)
+                .build();
 
         when(authentication.getName()).thenReturn("user2@example.com");
         when(userRepository.findByEmail("user2@example.com")).thenReturn(Optional.of(testUser2));
         when(userRepository.findByEmail("user1@example.com")).thenReturn(Optional.of(testUser1));
         when(groupRepository.findById(1)).thenReturn(Optional.of(testGroup));
         when(groupPartnershipRepository.findByGroupAndCreditorAndDebtor(testGroup, testUser1, testUser2))
-                .thenReturn(Optional.of(GroupPartnership.builder()
-                        .group(testGroup)
-                        .creditor(testUser1)
-                        .debtor(testUser2)
-                        .amount(50.0)
-                        .build()));
+                .thenReturn(Optional.of(groupPartnership));
 
         SettlementResponse response = splitBillService.settleDebt(request);
 
         assertNotNull(response);
-        assertEquals(50.0, response.getAmountSettled());
+        assertEquals(SHARE_AMOUNT, response.getAmountSettled());
     }
 
     @Test
     void testGetDebitCreditSummary() {
+
+        GroupPartnership groupPartnership = GroupPartnership.builder()
+                .group(testGroup)
+                .creditor(testUser1)
+                .debtor(testUser2)
+                .amount(DEBIT_CREDIT_AMOUNT)
+                .build();
+
+        List<GroupPartnership> groupPartnerships = Collections.singletonList(groupPartnership); // Intermediate variable
+
         when(authentication.getName()).thenReturn("user2@example.com");
         when(userRepository.findByEmail("user2@example.com")).thenReturn(Optional.of(testUser2));
         when(groupRepository.findById(1)).thenReturn(Optional.of(testGroup));
         when(groupPartnershipRepository.findByGroupAndDebtor(testGroup, testUser2))
-                .thenReturn(Collections.singletonList(GroupPartnership.builder()
-                        .group(testGroup)
-                        .creditor(testUser1)
-                        .debtor(testUser2)
-                        .amount(30.0)
-                        .build()));
+                .thenReturn(groupPartnerships); // Using the variable here
 
         DebitCreditSummaryResponse summary = splitBillService.getDebitCreditSummary(1);
 
         assertNotNull(summary);
-        assertEquals(30.0, summary.getTotalDebit());
+        assertEquals(DEBIT_CREDIT_AMOUNT, summary.getTotalDebit());
         assertEquals(0.0, summary.getTotalCredit());
     }
 }

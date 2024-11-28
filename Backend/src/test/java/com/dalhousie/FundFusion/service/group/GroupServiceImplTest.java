@@ -32,6 +32,8 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class GroupServiceImplTest {
 
+    private static final int MEMBER_ID = 2; // Added constant for the magic number
+
     @InjectMocks
     private GroupServiceImpl groupService;
 
@@ -97,7 +99,7 @@ public class GroupServiceImplTest {
         lenient().when(userGroupRepository.findByUserIdAndGroupId(creator.getId(), group.getId())).thenReturn(Optional.empty());
 
         User member = new User();
-        member.setId(2);
+        member.setId(MEMBER_ID);
         member.setEmail("member@example.com");
 
         lenient().when(userRepository.findByEmail("member@example.com")).thenReturn(Optional.of(member));
@@ -166,7 +168,7 @@ public class GroupServiceImplTest {
         creator.setEmail(creatorEmail);
 
         User member = new User();
-        member.setId(2);
+        member.setId(MEMBER_ID);
         member.setEmail(memberEmail);
 
         Group group = new Group();
@@ -193,7 +195,6 @@ public class GroupServiceImplTest {
 
         verify(userGroupRepository, times(1)).delete(memberUserGroup);
     }
-
 
     @Test
     public void testRemoveGroupMember_NotExist() {
@@ -242,7 +243,11 @@ public class GroupServiceImplTest {
         group.setUserGroups(new ArrayList<>());
 
         lenient().when(userRepository.findByEmail("creator@example.com")).thenReturn(Optional.of(user));
-        lenient().when(userGroupRepository.findByUserId(user.getId())).thenReturn(List.of(new UserGroup(1, "member@example.com", user, group)));
+
+        UserGroup userGroup = new UserGroup(1, "member@example.com", user, group);
+        List<UserGroup> userGroupList = List.of(userGroup);
+        lenient().when(userGroupRepository.findByUserId(user.getId())).thenReturn(userGroupList);
+
         lenient().when(pendingGroupMembersRepository.findByEmail(user.getEmail())).thenReturn(List.of());
 
         var response = groupService.getAllGroups();
