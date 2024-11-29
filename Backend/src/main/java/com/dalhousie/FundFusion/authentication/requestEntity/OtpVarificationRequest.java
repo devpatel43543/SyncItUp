@@ -16,5 +16,19 @@ public class OtpVarificationRequest {
     @NotNull
     private String otp;
 
+    /**
+     * Validates the OTP verification request fields.
+     *
+     * @throws IllegalArgumentException if any field is invalid.
+     */
+    public void validate() {
+        if (isInvalidOtp(otp)) {
+            throw new IllegalArgumentException("OTP cannot be empty.");
+        }
+    }
+
+    private boolean isInvalidOtp(String otp) {
+        return otp == null || otp.isBlank();
+    }
 
 }

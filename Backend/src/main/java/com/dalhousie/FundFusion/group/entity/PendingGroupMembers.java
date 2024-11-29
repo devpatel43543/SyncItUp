@@ -32,4 +32,7 @@ public class PendingGroupMembers {
 
     @Column(nullable = false)
     private LocalDateTime invitedAt = LocalDateTime.now();
+
+
+
 }

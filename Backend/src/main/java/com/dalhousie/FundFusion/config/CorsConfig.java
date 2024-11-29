@@ -8,6 +8,11 @@ import org.springframework.web.cors.CorsConfigurationSource;
 
 import java.util.List;
 
+/**
+ * CORS configuration for allowing frontend access from different origins.
+ * This is essential for enabling the frontend running on various ports to interact with the backend.
+ * Do not remove unless CORS is no longer required.
+ */
 @Configuration
 public class CorsConfig {
 
@@ -16,12 +21,12 @@ public class CorsConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(
                 List.of(
-                "http://localhost:80",
-                "http://localhost:81","http://localhost",
-                "http://csci5308-vm5.research.cs.dal.ca",
+                        "http://localhost:80",
+                        "http://localhost:81","http://localhost",
+                        "http://csci5308-vm5.research.cs.dal.ca",
                         "http://csci5308-vm5.research.cs.dal.ca:80",
                         "http://csci5308-vm5.research.cs.dal.ca:81"
-            )
+                )
         );
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));

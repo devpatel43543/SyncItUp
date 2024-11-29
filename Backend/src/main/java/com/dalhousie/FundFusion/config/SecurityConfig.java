@@ -13,6 +13,11 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * SecurityConfig class provides essential security configurations for the application.
+ * It defines HTTP security settings, manages stateless sessions, and integrates JWT filters.
+ * This configuration is crucial for the security framework and should not be removed.
+ * **/
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor

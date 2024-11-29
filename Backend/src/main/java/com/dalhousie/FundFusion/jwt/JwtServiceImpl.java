@@ -15,7 +15,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
-
+/**
+ * JwtServiceImpl provides key functionalities for generating, validating, and extracting information
+ * from JWT tokens. It plays a crucial role in user authentication and security, and should not be removed.
+ */
 @Service
 @Slf4j
 public class JwtServiceImpl implements JwtService{

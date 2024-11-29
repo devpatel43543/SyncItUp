@@ -190,10 +190,10 @@ public class GroupServiceImpl implements GroupService{
     }
 
    // all helper methods
-   private Set<String> getUniqueEmails(List<String> memberEmails) {
+   public Set<String> getUniqueEmails(List<String> memberEmails) {
        return memberEmails != null ? new HashSet<>(memberEmails) : new HashSet<>();
    }
-    private User getUserByEmail(String email) {
+    public User getUserByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
     }
