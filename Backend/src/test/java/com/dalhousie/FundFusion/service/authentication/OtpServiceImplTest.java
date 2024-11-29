@@ -27,12 +27,17 @@ public class OtpServiceImplTest {
 
     private Otp otp;
 
+    private static final long MS = 1000L;
+    private static final int SEC = 60;
+    private static final int MIN = 10;
+    private static final int OTP_LENGTH = 6;
+
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
         otp = Otp.builder()
                 .otp("123456")
-                .expiryDate(Instant.now().plusMillis(1000L * 60 * 10))
+                .expiryDate(Instant.now().plusMillis(MS * SEC * MIN))
                 .userId(1)
                 .build();
     }
@@ -44,12 +49,11 @@ public class OtpServiceImplTest {
         when(otpRepository.findByUserId(userId)).thenReturn(Optional.empty());
         when(otpRepository.save(any(Otp.class))).thenReturn(otp);
 
-
         Otp generatedOtp = otpService.generateOtp(userId);
 
         assertNotNull(generatedOtp);
         assertEquals(userId, generatedOtp.getUserId());
-        assertEquals(6, generatedOtp.getOtp().length());
+        assertEquals(OTP_LENGTH, generatedOtp.getOtp().length());
         verify(otpRepository, times(1)).findByUserId(userId);
     }
 
@@ -59,26 +63,22 @@ public class OtpServiceImplTest {
         Integer userId = 1;
         Otp existingOtp = Otp.builder()
                 .otp("123456")
-                .expiryDate(Instant.now().plusMillis(1000L * 60 * 10))
+                .expiryDate(Instant.now().plusMillis(MS * SEC * MIN))
                 .userId(userId)
                 .build();
         Otp newOtp = Otp.builder()
-                .otp("654321")  // This should be a new OTP value
-                .expiryDate(Instant.now().plusMillis(1000L * 60 * 10))
+                .otp("654321") // This should be a new OTP value
+                .expiryDate(Instant.now().plusMillis(MS * SEC * MIN))
                 .userId(userId)
                 .build();
 
-
-        when(otpRepository.findByUserId(userId)).thenReturn(Optional.of(existingOtp)); // Return the existing OTP
-        when(otpRepository.save(any(Otp.class))).thenReturn(newOtp); // Return a new OTP when saving
+        when(otpRepository.findByUserId(userId)).thenReturn(Optional.of(existingOtp));
+        when(otpRepository.save(any(Otp.class))).thenReturn(newOtp);
         Otp generatedOtp = otpService.resendOtp(userId);
 
-
         assertNotNull(generatedOtp);
-        assertNotEquals(existingOtp.getOtp(), generatedOtp.getOtp()); // Ensure the OTP is new
+        assertNotEquals(existingOtp.getOtp(), generatedOtp.getOtp());
     }
-
-
 
     @Test
     public void testDeleteOtp() {
@@ -96,9 +96,7 @@ public class OtpServiceImplTest {
         String otpValue = "123456";
         when(otpRepository.findByOtp(otpValue)).thenReturn(Optional.of(otp));
 
-
         Optional<Otp> foundOtp = otpService.findByOtp(otpValue);
-
 
         assertTrue(foundOtp.isPresent());
         assertEquals(otpValue, foundOtp.get().getOtp());
@@ -115,7 +113,7 @@ public class OtpServiceImplTest {
     @Test
     public void testIsOtpValid_expiredOtp() {
 
-        otp.setExpiryDate(Instant.now().minusMillis(1000L * 60 * 10));
+        otp.setExpiryDate(Instant.now().minusMillis(MS * SEC * MIN));
         TokenExpiredException exception = assertThrows(TokenExpiredException.class, () -> otpService.isOtpValid(otp));
         assertEquals("otp has expired.", exception.getMessage());
     }
@@ -131,4 +129,3 @@ public class OtpServiceImplTest {
         assertFalse(otpService.isOtpValid(otp));
     }
 }
-

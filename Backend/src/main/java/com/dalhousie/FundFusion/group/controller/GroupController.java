@@ -25,218 +25,162 @@ import java.util.List;
 @RequestMapping("/group")
 public class GroupController {
     private final GroupService groupService;
+    private static final String GENERAL_ERROR = "Something went wrong";
+
     @PostMapping("/create")
     public ResponseEntity<CustomResponseBody<GroupResponse>> createGroup(@RequestBody GroupRequest groupRequest) {
         log.info("line number 26 from groupController:{}", groupRequest);
-
         try {
             GroupResponse response = groupService.createGroup(groupRequest);
             log.info("User registered successfully with email: {}", response.getGroupName());
-            CustomResponseBody<GroupResponse> responseBody =new CustomResponseBody<>(CustomResponseBody.Result.SUCCESS,response,"group created successfully");
-            return ResponseEntity.status(HttpStatus.CREATED).body(responseBody);
-        }catch (GroupAlreadyExistsException e){
-            log.error("Unexpected error during user registration: {}", e.getMessage());
-            CustomResponseBody<GroupResponse> responseBody = new CustomResponseBody<>(CustomResponseBody.Result.FAILURE, null, "Something went wrong");
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(responseBody);
-        }
-        catch (Exception e) {
-            log.error("Unexpected error during user registration: {}", e.getMessage());
-            CustomResponseBody<GroupResponse> responseBody = new CustomResponseBody<>(CustomResponseBody.Result.FAILURE, null, "Something went wrong");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseBody);
+            return buildResponse(HttpStatus.CREATED, CustomResponseBody.Result.SUCCESS, response, "Group created successfully");
+        } catch (GroupAlreadyExistsException e) {
+            log.error("Group creation error: {}", e.getMessage());
+            return buildResponse(HttpStatus.CONFLICT, CustomResponseBody.Result.FAILURE, null, "Group already exists");
+        } catch (Exception e) {
+            log.error("Unexpected error during group creation: {}", e.getMessage());
+            return buildErrorResponse();
         }
     }
+
     @GetMapping("/allGroup")
     public ResponseEntity<CustomResponseBody<List<GroupSummaryResponse>>> getAllGroups() {
         try {
             List<GroupSummaryResponse> groupResponses = groupService.getAllGroups();
-            log.info("line 49:{}",groupResponses.toString());
-            CustomResponseBody<List<GroupSummaryResponse>> responseBody = new CustomResponseBody<>(
-                    CustomResponseBody.Result.SUCCESS,
-                    groupResponses,
-                    "Fetched all groups successfully"
-            );
-            return ResponseEntity.status(HttpStatus.OK).body(responseBody);
+            log.info("line 49: {}", groupResponses.toString());
+            return buildResponse(HttpStatus.OK, CustomResponseBody.Result.SUCCESS, groupResponses, "Fetched all groups successfully");
         } catch (Exception e) {
             log.error("Unexpected error during fetching all groups: {}", e.getMessage());
-            CustomResponseBody<List<GroupSummaryResponse>> responseBody = new CustomResponseBody<>(
-                    CustomResponseBody.Result.FAILURE,
-                    null,
-                    "Something went wrong"
-            );
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseBody);
+            return buildErrorResponse();
         }
     }
 
     @GetMapping("/individual")
     public ResponseEntity<CustomResponseBody<GroupResponse>> getIndividualGroup(@RequestParam Integer groupId) {
-        try{
+        try {
             GroupResponse groupResponse = groupService.getGroupById(groupId);
-            CustomResponseBody<GroupResponse> responseBody = new CustomResponseBody<>(
-                    CustomResponseBody.Result.SUCCESS,
-                    groupResponse,
-                    "Fetched group details successfully"
-            );
-            return ResponseEntity.status(HttpStatus.OK).body(responseBody);
-        }catch (Exception e) {
-            log.error("Unexpected error during group data fetching: {}", e.getMessage());
-
-            CustomResponseBody<GroupResponse> responseBody = new CustomResponseBody<>(
-                    CustomResponseBody.Result.FAILURE,
-                    null,
-                    "Something went wrong"
-            );
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseBody);
-        }
-    }
-    @PostMapping("/addNewMember")
-    public ResponseEntity<CustomResponseBody<GroupResponse>> addNewMember(@RequestParam Integer groupId, @RequestBody AddNewMemberRequest request) {
-        try{
-            GroupResponse response = groupService.addGroupMembers(groupId, request.getNewMemberEmails());
-            CustomResponseBody<GroupResponse> responseBody = new CustomResponseBody<>(
-                    CustomResponseBody.Result.SUCCESS,
-                    response,
-                    "Members added successfully"
-            );
-            return ResponseEntity.status(HttpStatus.CREATED).body(responseBody);
+            return buildResponse(HttpStatus.OK, CustomResponseBody.Result.SUCCESS, groupResponse, "group details successfully");
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            log.error("Unexpected error during group data fetching: {}", e.getMessage());
+            return buildErrorResponse();
         }
     }
+
+    @PostMapping("/addNewMember")
+    public ResponseEntity<CustomResponseBody<GroupResponse>> addNewMember(
+            @RequestParam Integer groupId,
+            @RequestBody AddNewMemberRequest request) {
+        try {
+            GroupResponse response = groupService.addGroupMembers(groupId, request.getNewMemberEmails());
+            return buildResponse(HttpStatus.CREATED, CustomResponseBody.Result.SUCCESS, response, "Members added successfully");
+        } catch (Exception e) {
+            log.error("Unexpected error during adding new members: {}", e.getMessage());
+            return buildErrorResponse();
+        }
+    }
+
 
     @DeleteMapping("/removeMember")
     public ResponseEntity<CustomResponseBody<GroupResponse>> removeMember(
             @RequestParam Integer groupId,
             @RequestParam String memberEmail) {
-
         try {
-            log.info("group:{}", groupId);
-            log.info("member:{}", memberEmail);
+            log.info("Removing member: group={}, member={}", groupId, memberEmail);
             GroupResponse response = groupService.removeGroupMember(groupId, memberEmail);
-            log.info("User deleted successfully from group: {}, member email: {}", groupId, response.getMembers());
-
-            CustomResponseBody<GroupResponse> responseBody = new CustomResponseBody<>(
-                    CustomResponseBody.Result.SUCCESS,
-                    response,
-                    "Group member deleted successfully"
-            );
-            return ResponseEntity.status(HttpStatus.OK).body(responseBody);
-
-        }catch(AccessDeniedException e){
-            log.error("Access denied exception: {}", e.getMessage());
-            CustomResponseBody<GroupResponse> responseBody = new CustomResponseBody<>(CustomResponseBody.Result.FAILURE, null, "Something went wrong");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseBody);
-        }
-        catch (Exception e) {
+            return buildResponse(HttpStatus.OK, CustomResponseBody.Result.SUCCESS, response, "Group member deleted successfully");
+        } catch (AccessDeniedException e) {
+            log.error("Access denied: {}", e.getMessage());
+            return buildResponse(HttpStatus.UNAUTHORIZED, CustomResponseBody.Result.FAILURE, null, "Access denied");
+        } catch (Exception e) {
             log.error("Unexpected error during member deletion: {}", e.getMessage());
-
-            CustomResponseBody<GroupResponse> responseBody = new CustomResponseBody<>(
-                    CustomResponseBody.Result.FAILURE,
-                    null,
-                    "Something went wrong"
-            );
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseBody);
+            return buildErrorResponse();
         }
     }
+
     @GetMapping("/allMembers")
     public ResponseEntity<CustomResponseBody<List<String>>> getAllMembers(@RequestParam Integer groupId) {
         try {
             List<String> members = groupService.allMemberEmails(groupId);
-            CustomResponseBody<List<String>> responseBody = new CustomResponseBody<>(CustomResponseBody.Result.SUCCESS,members,"all members successfully fetched");
-            return ResponseEntity.status(HttpStatus.OK).body(responseBody);
-        }catch (Exception e) {
-            log.error("Unexpected error during fetching all members: {}", e.getMessage());
-            CustomResponseBody<List<String>> responseBody = new CustomResponseBody<>(
-                    CustomResponseBody.Result.FAILURE,
-                    null,
-                    "Something went wrong"
+            return buildResponse(
+                    HttpStatus.OK,
+                    CustomResponseBody.Result.SUCCESS,
+                    members,
+                    "All members successfully fetched"
             );
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseBody);
-        }
+        } catch (Exception e) {
+            log.error("Unexpected error during fetching all members: {}", e.getMessage());
+            return buildErrorResponse();
 
+        }
     }
+
     @PutMapping("/update")
     public ResponseEntity<CustomResponseBody<GroupResponse>> updateGroup(
             @RequestParam Integer groupId,
             @RequestBody GroupUpdateRequest updateRequest) {
         try {
             GroupResponse response = groupService.updateGroup(groupId, updateRequest);
-            CustomResponseBody<GroupResponse> responseBody = new CustomResponseBody<>(
+            return buildResponse(
+                    HttpStatus.OK,
                     CustomResponseBody.Result.SUCCESS,
                     response,
                     "Group information updated successfully"
             );
-            return ResponseEntity.status(HttpStatus.OK).body(responseBody);
         } catch (Exception e) {
             log.error("Unexpected error during group update: {}", e.getMessage());
-            CustomResponseBody<GroupResponse> responseBody = new CustomResponseBody<>(
-                    CustomResponseBody.Result.FAILURE,
-                    null,
-                    "Something went wrong"
-            );
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseBody);
+            return buildErrorResponse();
+
         }
     }
+
     @GetMapping("/pendingRequests")
-    public ResponseEntity<CustomResponseBody<List<PendingGroupMemberResponse>>> getAllPendingRequests(
-            ) {
+    public ResponseEntity<CustomResponseBody<List<PendingGroupMemberResponse>>> getAllPendingRequests() {
         try {
             List<PendingGroupMemberResponse> pendingRequests = groupService.getAllPendingRequest();
-            CustomResponseBody<List<PendingGroupMemberResponse>> responseBody = new CustomResponseBody<>(
-                    CustomResponseBody.Result.SUCCESS,
-                    pendingRequests,
-                    "Pending requests fetched successfully."
-            );
-            return ResponseEntity.status(HttpStatus.OK).body(responseBody);
+            return buildResponse(HttpStatus.OK, CustomResponseBody.Result.SUCCESS, pendingRequests, "fetched successfully.");
         } catch (Exception e) {
-            CustomResponseBody<List<PendingGroupMemberResponse>> responseBody = new CustomResponseBody<>(
-                    CustomResponseBody.Result.FAILURE,
-                    null,
-                    "Failed to fetch pending requests."
-            );
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseBody);
+            log.error("Error fetching pending requests: {}", e.getMessage());
+            return buildErrorResponse();
         }
     }
+
 
     @DeleteMapping("/reject")
-    public ResponseEntity<CustomResponseBody<Void>> rejectPendingMember(
-            @RequestParam Integer groupId) {
+    public ResponseEntity<CustomResponseBody<Void>> rejectPendingMember(@RequestParam Integer groupId) {
         try {
             groupService.rejectPendingMember(groupId);
-            CustomResponseBody<Void> responseBody = new CustomResponseBody<>(
-                    CustomResponseBody.Result.SUCCESS,
-                    null,
-                    "Pending group membership rejected successfully."
-            );
-            return ResponseEntity.status(HttpStatus.OK).body(responseBody);
+            return buildResponse(HttpStatus.OK, CustomResponseBody.Result.SUCCESS, null, "rejected successfully.");
         } catch (Exception e) {
-            CustomResponseBody<Void> responseBody = new CustomResponseBody<>(
-                    CustomResponseBody.Result.FAILURE,
-                    null,
-                    "Failed to reject pending group membership."
-            );
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseBody);
+            log.error("Error rejecting pending member: {}", e.getMessage());
+            return buildErrorResponse();
         }
     }
 
+
     @PostMapping("/accept")
-    public ResponseEntity<CustomResponseBody<Void>> acceptPendingMember(
-            @RequestParam Integer groupId) {
+    public ResponseEntity<CustomResponseBody<Void>> acceptPendingMember(@RequestParam Integer groupId) {
         try {
             groupService.acceptPendingMember(groupId);
-            CustomResponseBody<Void> responseBody = new CustomResponseBody<>(
-                    CustomResponseBody.Result.SUCCESS,
-                    null,
-                    "Pending group membership accepted successfully."
-            );
-            return ResponseEntity.status(HttpStatus.OK).body(responseBody);
+            return buildResponse(HttpStatus.OK, CustomResponseBody.Result.SUCCESS, null, "membership accepted successfully.");
         } catch (Exception e) {
-            CustomResponseBody<Void> responseBody = new CustomResponseBody<>(
-                    CustomResponseBody.Result.FAILURE,
-                    null,
-                    "Failed to accept pending group membership."
-            );
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseBody);
+            log.error("Error accepting pending member: {}", e.getMessage());
+            return buildErrorResponse();
         }
+    }
+
+
+    // Generic helper method to create a response
+    private <T> ResponseEntity<CustomResponseBody<T>> buildResponse(
+            HttpStatus status,
+            CustomResponseBody.Result result,
+            T data,
+            String message) {
+        CustomResponseBody<T> responseBody = new CustomResponseBody<>(result, data, message);
+        return ResponseEntity.status(status).body(responseBody);
+    }
+
+    private <T> ResponseEntity<CustomResponseBody<T>> buildErrorResponse() {
+        return buildResponse(HttpStatus.BAD_REQUEST, CustomResponseBody.Result.FAILURE, null, GENERAL_ERROR);
     }
 
 }

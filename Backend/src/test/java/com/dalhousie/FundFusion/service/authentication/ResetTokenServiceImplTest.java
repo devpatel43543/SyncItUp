@@ -28,7 +28,10 @@ class ResetTokenServiceImplTest {
 
     private static final int USER_ID = 1;
     private static final String TOKEN = UUID.randomUUID().toString();
-    private static final Instant EXPIRY_DATE = Instant.now().plusMillis(1000L * 60 * 10);
+    private static final long MS = 1000L;
+    private static final int SEC = 60;
+    private static final int MIN = 10;
+    private static final Instant EXPIRY_DATE = Instant.now().plusMillis(MS * SEC * MIN);
 
     @BeforeEach
     void setUp() {
@@ -59,11 +62,10 @@ class ResetTokenServiceImplTest {
 
     @Test
     void testCreateResetPasswordToken_ExistingToken() {
-
         PasswordReset existingPasswordReset = PasswordReset.builder()
                 .userId(USER_ID)
                 .token("existingToken")
-                .expiryDate(Instant.now().plusMillis(1000L * 60 * 10))
+                .expiryDate(Instant.now().plusMillis(MS * SEC * MIN))
                 .build();
         PasswordReset newPasswordReset = PasswordReset.builder()
                 .userId(USER_ID)
@@ -74,9 +76,7 @@ class ResetTokenServiceImplTest {
         when(passwordResetTokenRepository.findByUserId(USER_ID)).thenReturn(Optional.of(existingPasswordReset));
         when(passwordResetTokenRepository.save(any(PasswordReset.class))).thenReturn(newPasswordReset);
 
-
         PasswordReset createdToken = resetTokenService.createResetPasswordToken(USER_ID);
-
 
         assertNotNull(createdToken);
         assertEquals(USER_ID, createdToken.getUserId());
@@ -145,12 +145,12 @@ class ResetTokenServiceImplTest {
     @Test
     void testIsTokenValid_ExpiredToken() {
 
+        Instant expiredDate = Instant.now().minusMillis(MS * SEC * MIN);
         PasswordReset expiredPasswordReset = PasswordReset.builder()
                 .userId(USER_ID)
                 .token(TOKEN)
-                .expiryDate(Instant.now().minusMillis(1000L * 60 * 10))
+                .expiryDate(expiredDate)
                 .build();
-
 
         TokenExpiredException exception = assertThrows(TokenExpiredException.class, () -> {
             resetTokenService.isTokenValid(expiredPasswordReset);

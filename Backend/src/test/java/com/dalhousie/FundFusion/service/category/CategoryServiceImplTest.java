@@ -34,6 +34,9 @@ class CategoryServiceImplTest {
     @InjectMocks
     private CategoryServiceImpl categoryService;
 
+    private static final int USER_CATEGORY_ID = 2;
+    private static final int NEW_CATEGORY_ID = 3;
+
     private User mockUser;
     private Category defaultCategory;
     private Category userCategory;
@@ -50,7 +53,7 @@ class CategoryServiceImplTest {
         defaultCategory.setDefault(true);
 
         userCategory = new Category();
-        userCategory.setCategoryId(2);
+        userCategory.setCategoryId(USER_CATEGORY_ID);
         userCategory.setCategoryName("User Category");
         userCategory.setDefault(false);
         userCategory.setUser(mockUser);
@@ -58,6 +61,7 @@ class CategoryServiceImplTest {
         categoryRequest = new CategoryRequest();
         categoryRequest.setCategoryId(1);
     }
+
 
     @Test
     void testGetCategory_SuccessWithDefaultCategory() {
@@ -76,13 +80,17 @@ class CategoryServiceImplTest {
 
         when(userService.getCurrentUser()).thenReturn(mockUser);
         when(categoryRepository.findByIsDefault(true)).thenReturn(Optional.of(List.of()));
-        when(categoryRepository.findByCategoryIdAndUser(categoryRequest.getCategoryId(), mockUser))
-                .thenReturn(Optional.of(userCategory));
+
+        int categoryId = categoryRequest.getCategoryId();
+        Optional<Category> userCategoryOptional = Optional.of(userCategory);
+
+        when(categoryRepository.findByCategoryIdAndUser(categoryId, mockUser))
+                .thenReturn(userCategoryOptional);
 
         Category result = categoryService.getCategory(categoryRequest);
 
         assertNotNull(result);
-        assertEquals(userCategory.getCategoryId(), result.getCategoryId());
+        assertEquals(USER_CATEGORY_ID, result.getCategoryId());
     }
 
     @Test
@@ -105,7 +113,7 @@ class CategoryServiceImplTest {
 
         List<CategoryResponse> result = categoryService.getAllCategories();
 
-        assertEquals(2, result.size());
+        assertEquals(USER_CATEGORY_ID, result.size());
         assertTrue(result.stream().anyMatch(c -> c.getCategoryId().equals(defaultCategory.getCategoryId())));
         assertTrue(result.stream().anyMatch(c -> c.getCategoryId().equals(userCategory.getCategoryId())));
     }
@@ -132,7 +140,7 @@ class CategoryServiceImplTest {
 
         when(userService.getCurrentUser()).thenReturn(mockUser);
         Category newCategory = new Category();
-        newCategory.setCategoryId(3);
+        newCategory.setCategoryId(NEW_CATEGORY_ID);
         newCategory.setCategoryName("New Category");
         when(categoryRepository.save(any(Category.class))).thenReturn(newCategory);
 
@@ -142,16 +150,16 @@ class CategoryServiceImplTest {
 
         assertNotNull(response);
         assertEquals("New Category", response.getCategory());
-        assertEquals(3, response.getCategoryId());
+        assertEquals(NEW_CATEGORY_ID, response.getCategoryId());
     }
 
     @Test
     void testDeleteCategory_Success() {
 
         when(userService.getCurrentUser()).thenReturn(mockUser);
-        when(categoryRepository.findByCategoryIdAndUser(2, mockUser)).thenReturn(Optional.of(userCategory));
+        when(categoryRepository.findByCategoryIdAndUser(USER_CATEGORY_ID, mockUser)).thenReturn(Optional.of(userCategory));
 
-        categoryService.deleteCategory(2);
+        categoryService.deleteCategory(USER_CATEGORY_ID);
         verify(categoryRepository, times(1)).delete(userCategory);
     }
 
@@ -159,8 +167,8 @@ class CategoryServiceImplTest {
     void testDeleteCategory_NotFoundException() {
 
         when(userService.getCurrentUser()).thenReturn(mockUser);
-        when(categoryRepository.findByCategoryIdAndUser(2, mockUser)).thenReturn(Optional.empty());
+        when(categoryRepository.findByCategoryIdAndUser(USER_CATEGORY_ID, mockUser)).thenReturn(Optional.empty());
 
-        assertThrows(CategoryNotFoundException.class, () -> categoryService.deleteCategory(2));
+        assertThrows(CategoryNotFoundException.class, () -> categoryService.deleteCategory(USER_CATEGORY_ID));
     }
 }

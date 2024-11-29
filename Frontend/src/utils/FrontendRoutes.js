@@ -1,4 +1,3 @@
-
 export const frontEndRoutes = {
     login:"/",
     register:"/register",
@@ -9,6 +8,11 @@ export const frontEndRoutes = {
     createGroup:"/createGroup",
     groupExpenseDashboard:"/allGroups",
     add_new_member:"/newMember",
+    groupDetails:"/groupDetails",
+    addExpense:"/addExpense",
+    transactionSummary:"/transactionSummary",
     remove_member:"/removeMember",
-    requests:"/allRequests"
+    requests:"/allRequests",
+    settleUp: "/settleUp"
 }
+
