@@ -47,7 +47,6 @@ For building and running the application locally, the project requires:
 | jjwt-jackson                  | 0.11.5   | JWT (JSON Web Token) Jackson module for Java                                                    |
 | spring-boot-starter-mail      | 3.3.4    | Starter for using Spring Framework's MailSender, which is used for sending email               |
 | spring-boot-starter-data-neo4j| 3.3.4    | Starter for using Spring Data Neo4j with Hibernate for working with Neo4j                       |
-| neo4j-java-driver             | 5.24.0   | Official Neo4j Java driver for interacting with a Neo4j database                                |
 | h2                            | 2.1.214  | H2 Database engine for testing in local environments                                           |
 
 # Running Application
