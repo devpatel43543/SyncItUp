@@ -54,26 +54,26 @@ For building and running the application locally, the project requires:
 
 ## Remotely
 Prerequisite: Connect to dal wifi or use dal vpn.  
-**URL**: http://csci5308-vm6.research.cs.dal.ca 
+**URL**: http://csci5308-vm5.research.cs.dal.ca:81/ 
 
 ## Locally
 - Clone Repository to your local machine
 - Create a Database called “fundfusion” using MySQL workbench
 - Edit the following variables in `backend/src/main/resources/application.yml`
 
-## Setting up Back-end
-### Using in-memory H2 database:
-To start the backend with an in-memory H2 database, run the following command:
-```bash
-mvn spring-boot:run -Dspring-boot.run.profiles=local-MySQL
 
-## Setting up Front-end
+## Setting up Back-end
+ Using in-memory H2 database:
+To start the backend with an in-memory H2 database, run the following command:
+mvn spring-boot:run -Dspring-boot.run.profiles=local-mysql
+
+## Setting up front-end
+Run below command to run the front end.
   npm run dev -- --port 80
 If this doesn’t work try using with sudo(for linux/Mac) 
 sudo  npm run dev -- --port 80
 
-# Contributors
-
+## Contributors
 - Devkumar Patel: dv943844@dal.ca 
 - Malav Shah: ml677231@dal.ca
 - Dhruvgiri goswami: dh890776@dal.ca
